@@ -950,8 +950,8 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Param: FS_OPTIONS
     // @DisplayName: Failsafe options bitmask
     // @Description: Bitmask of additional options for battery, radio, & GCS failsafes. 0 (default) disables all options.
-    // @Values: 0:Disabled, 1:Continue in auto mode on RC FS only, 2:Continue auto mode on GCS FS only, 3:Continue in auto mode on RC and/or GCS FS, 19:Continue in auto mode on RC and/or GCS FS + continue in pilot controlled modes
-    // @Bitmask: 0:Continue if in auto mode on RC failsafe, 1:Continue if in auto mode on GCS failsafe, 3:Continue if in guided mode on RC failsafe, 4:Continue if landing on any failsafe, 5:Continue if in pilot controlled modes on RC failsafe
+    // @Values: 0:Disabled, 1:Continue if in Auto on RC failsafe only, 2:Continue if in Auto on GCS failsafe only, 3:Continue if in Auto on RC and/or GCS failsafe, 4:Continue if in Guided on RC failsafe only, 8:Continue if landing on any failsafe, 16:Continue if in pilot controlled modes on GCS failsafe, 19:Continue if in Auto on RC and/or GCS failsafe and continue if in pilot controlled modes on GCS failsafe
+    // @Bitmask: 0:Continue if in Auto on RC failsafe, 1:Continue if in Auto on GCS failsafe, 2:Continue if in Guided on RC failsafe, 3:Continue if landing on any failsafe, 4:Continue if in pilot controlled modes on GCS failsafe
     // @User: Advanced
     AP_GROUPINFO("FS_OPTIONS", 36, ParametersG2, fs_options, 0),
 
