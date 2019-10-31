@@ -733,7 +733,7 @@ private:
     void set_mode_SmartRTL_or_RTL(ModeReason reason);
     void set_mode_SmartRTL_or_land_with_pause(ModeReason reason);
     bool should_disarm_on_failsafe();
-    void do_failsafe_action(const int8_t action, const ModeReason reason);
+    void do_failsafe_action(Failsafe_Action action, ModeReason reason);
 
     // failsafe.cpp
     void failsafe_enable();
