@@ -34,7 +34,7 @@ public:
     const Vector3f& get_center() const { return _center; }
 
     /// get_radius - returns radius of circle in cm
-    float get_radius() { return _radius; }
+    float get_radius() const { return _radius; }
 
     /// set_radius - sets circle radius in cm
     void set_radius(float radius_cm);
@@ -64,7 +64,7 @@ public:
     //  closest point on the circle will be placed in result
     //  result's altitude (i.e. z) will be set to the circle_center's altitude
     //  if vehicle is at the center of the circle, the edge directly behind vehicle will be returned
-    void get_closest_point_on_circle(Vector3f &result);
+    void get_closest_point_on_circle(Vector3f &result) const;
 
     /// get horizontal distance to loiter target in cm
     float get_distance_to_target() const { return _pos_control.get_distance_to_target(); }

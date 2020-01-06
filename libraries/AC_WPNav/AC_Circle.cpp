@@ -116,7 +116,7 @@ void AC_Circle::set_rate(float deg_per_sec)
 /// set_circle_rate - set circle rate in degrees per second
 void AC_Circle::set_radius(float radius_cm)
 {
-    _radius = constrain_float(radius_cm,0,AC_CIRCLE_RADIUS_MAX);
+    _radius = constrain_float(radius_cm, 0, AC_CIRCLE_RADIUS_MAX);
     calc_velocities(false);
 }
 
@@ -181,7 +181,7 @@ void AC_Circle::update()
 //  closest point on the circle will be placed in result
 //  result's altitude (i.e. z) will be set to the circle_center's altitude
 //  if vehicle is at the center of the circle, the edge directly behind vehicle will be returned
-void AC_Circle::get_closest_point_on_circle(Vector3f &result)
+void AC_Circle::get_closest_point_on_circle(Vector3f &result) const
 {
     // return center if radius is zero
     if (_radius <= 0) {
