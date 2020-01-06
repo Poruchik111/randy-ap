@@ -10,6 +10,7 @@
 bool ModeCircle::init(bool ignore_checks)
 {
     pilot_yaw_override = false;
+    speed_changing = false;
 
     // initialize speeds and accelerations
     pos_control->set_max_speed_xy(wp_nav->get_default_speed_xy());
