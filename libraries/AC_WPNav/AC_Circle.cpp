@@ -9,7 +9,7 @@ const AP_Param::GroupInfo AC_Circle::var_info[] = {
     // @DisplayName: Circle Radius
     // @Description: Defines the radius of the circle the vehicle will fly when in Circle flight mode
     // @Units: cm
-    // @Range: 0 10000
+    // @Range: 0 200000
     // @Increment: 100
     // @User: Standard
     AP_GROUPINFO("RADIUS",  0,  AC_Circle, _radius, AC_CIRCLE_RADIUS_DEFAULT),
@@ -22,6 +22,13 @@ const AP_Param::GroupInfo AC_Circle::var_info[] = {
     // @Increment: 1
     // @User: Standard
     AP_GROUPINFO("RATE",    1, AC_Circle, _rate,    AC_CIRCLE_RATE_DEFAULT),
+
+    // @Param: CONTROL
+    // @DisplayName: Circle control
+    // @Description: Enable or disable using the pitch/roll stick control circle mode's radius and rate
+    // @Values: 0:Disable,1:Enable
+    // @User: Standard
+    AP_GROUPINFO("CONTROL", 2, AC_Circle, _control, 0),
 
     AP_GROUPEND
 };
@@ -104,6 +111,13 @@ void AC_Circle::set_rate(float deg_per_sec)
         _rate = deg_per_sec;
         calc_velocities(false);
     }
+}
+
+/// set_circle_rate - set circle rate in degrees per second
+void AC_Circle::set_radius(float radius_cm)
+{
+    _radius = constrain_float(radius_cm,0,AC_CIRCLE_RADIUS_MAX);
+    calc_velocities(false);
 }
 
 /// update - update circle controller
