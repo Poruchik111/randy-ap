@@ -44,36 +44,36 @@ void ModeCircle::run()
     // skip if in radio failsafe
     if (!copter.failsafe.radio && copter.circle_nav->pilot_control_enabled()) {
         // update the circle controller's radius target based on pilot pitch stick inputs
-        float radius_current = copter.circle_nav->get_radius();         // circle controller's radius target, which begins as the circle_radius parameter
-        float pitch_stick = channel_pitch->norm_input_dz();             // pitch stick normalized -1 to 1
-        float nav_speed = copter.wp_nav->get_default_speed_xy();        // copter WP_NAV parameter speed
-        float radius_pilot_change = (pitch_stick * nav_speed) * G_Dt;   // rate of change
-        float radius_new = MAX(radius_current + radius_pilot_change,0); // new radius target
+        const float radius_current = copter.circle_nav->get_radius();           // circle controller's radius target, which begins as the circle_radius parameter
+        const float pitch_stick = channel_pitch->norm_input_dz();               // pitch stick normalized -1 to 1
+        const float nav_speed = copter.wp_nav->get_default_speed_xy();          // copter WP_NAV parameter speed
+        const float radius_pilot_change = (pitch_stick * nav_speed) * G_Dt;     // rate of change
+        const float radius_new = MAX(radius_current + radius_pilot_change,0);   // new radius target
 
-        if (!is_equal(radius_current,radius_new)) {
+        if (!is_equal(radius_current, radius_new)) {
             copter.circle_nav->set_radius(radius_new);
         }
 
         // update the orbicular rate target based on pilot roll stick inputs
         // skip if using CH6 tuning knob for circle rate
         if (g.radio_tuning != TUNING_CIRCLE_RATE) {
-            float roll_stick = channel_roll->norm_input_dz();           // roll stick normalized -1 to 1
+            const float roll_stick = channel_roll->norm_input_dz();         // roll stick normalized -1 to 1
 
             if (is_zero(roll_stick)) {
                 // no speed change, so reset speed changing flag
                 speed_changing = false;
             } else {
-                float rate = copter.circle_nav->get_rate();                 // circle controller's rate target, which begins as the circle_rate parameter
-                float rate_current = copter.circle_nav->get_rate_current(); // current adjusted rate target, which is probably different from _rate
-                float rate_pilot_change = (roll_stick * G_Dt);              // rate of change from 0 to 1 degrees per second
+                const float rate = copter.circle_nav->get_rate();           // circle controller's rate target, which begins as the circle_rate parameter
+                const float rate_current = copter.circle_nav->get_rate_current(); // current adjusted rate target, which is probably different from _rate
+                const float rate_pilot_change = (roll_stick * G_Dt);        // rate of change from 0 to 1 degrees per second
                 float rate_new = rate_current;                              // new rate target
                 if (is_positive(rate)) {
                     // currently moving clockwise, constrain 0 to 90
-                    rate_new = constrain_float(rate_current + rate_pilot_change,0,90);
+                    rate_new = constrain_float(rate_current + rate_pilot_change, 0, 90);
 
                 } else if (is_negative(rate)) {
                     // currently moving counterclockwise, constrain -90 to 0
-                    rate_new = constrain_float(rate_current + rate_pilot_change,-90,0);
+                    rate_new = constrain_float(rate_current + rate_pilot_change, -90, 0);
 
                 } else if (is_zero(rate) && !speed_changing) {
                     // Stopped, pilot has released the roll stick, and pilot now wants to begin moving with the roll stick
