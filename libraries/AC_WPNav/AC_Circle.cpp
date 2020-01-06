@@ -28,7 +28,7 @@ const AP_Param::GroupInfo AC_Circle::var_info[] = {
     // @Description: Enable or disable using the pitch/roll stick control circle mode's radius and rate
     // @Values: 0:Disable,1:Enable
     // @User: Standard
-    AP_GROUPINFO("CONTROL", 2, AC_Circle, _control, 0),
+    AP_GROUPINFO("CONTROL", 2, AC_Circle, _control, 1),
 
     AP_GROUPEND
 };
