@@ -721,6 +721,13 @@ void ModeAuto::takeoff_run()
 //      called by auto_run at 100hz or more
 void ModeAuto::wp_run()
 {
+    // if not armed set throttle to zero and exit immediately
+    if (is_disarmed_or_landed()) {
+        make_safe_spool_down();
+        wp_nav->wp_and_spline_init();
+        return;
+    }
+
     // process pilot's yaw input
     float target_yaw_rate = 0;
     if (!copter.failsafe.radio) {
@@ -729,13 +736,16 @@ void ModeAuto::wp_run()
         if (!is_zero(target_yaw_rate)) {
             auto_yaw.set_mode(AUTO_YAW_HOLD);
         }
-    }
 
-    // if not armed set throttle to zero and exit immediately
-    if (is_disarmed_or_landed()) {
-        make_safe_spool_down();
-        wp_nav->wp_and_spline_init();
-        return;
+        // get pilot desired climb rate
+        float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
+        target_climb_rate = constrain_float(target_climb_rate, -wp_nav->get_default_speed_down(), wp_nav->get_default_speed_up());
+        if (!is_zero(target_climb_rate)) {
+            Vector3f offset_ned = wp_nav->get_pos_target_offset();
+            offset_ned.z -= target_climb_rate * 0.01f / copter.scheduler.get_loop_rate_hz();
+            offset_ned.z = constrain_float(offset_ned.z, -20.0f, 20.0f);
+            wp_nav->set_pos_target_offset(offset_ned);
+        }
     }
 
     // set motors to full range
