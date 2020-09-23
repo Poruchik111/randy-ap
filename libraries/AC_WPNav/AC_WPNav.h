@@ -240,6 +240,10 @@ public:
     /// return the crosstrack_error - horizontal error of the actual position vs the desired position
     float crosstrack_error() const { return _track_error_xy;}
 
+    /// get or set position target offset in meters in NED frame
+    const Vector3f get_pos_target_offset() const;
+    void set_pos_target_offset(const Vector3f& offset_ned);
+
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
@@ -339,4 +343,7 @@ protected:
     AP_Int8     _rangefinder_use;
     bool        _rangefinder_healthy;
     float       _rangefinder_alt_cm;
+
+    // position offset variables
+    Vector3f    _pos_offset_cm_neu;     // position target offset in cm in NEU frame
 };

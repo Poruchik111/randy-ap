@@ -148,6 +148,9 @@ void AC_WPNav::wp_and_spline_init()
 
     // initialise yaw heading to current heading target
     _flags.wp_yaw_set = false;
+
+    // clear position offset
+    _pos_offset_cm_neu.zero();
 }
 
 /// set_speed_xy - allows main code to pass target horizontal velocity for wp navigation
@@ -381,7 +384,8 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
     bool reached_leash_limit = false;   // true when track has reached leash limit and we need to slow down the target point
 
     // get current location
-    const Vector3f &curr_pos = _inav.get_position();
+    // subtract offset from current position to fly at offset from target
+    const Vector3f &curr_pos = _inav.get_position() - _pos_offset_cm_neu;
 
     // calculate terrain adjustments
     float terr_offset = 0.0f;
@@ -487,7 +491,7 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
     }
 
     // recalculate the desired position
-    Vector3f final_target = _origin + _pos_delta_unit * _track_desired;
+    Vector3f final_target = _origin + _pos_delta_unit * _track_desired + _pos_offset_cm_neu;
     // convert final_target.z to altitude above the ekf origin
     final_target.z += terr_offset;
     _pos_control.set_pos_target(final_target);
@@ -899,7 +903,8 @@ bool AC_WPNav::advance_spline_target_along_track(float dt)
         calculate_wp_leash_length();
 
         // get current location
-        const Vector3f &curr_pos = _inav.get_position();
+        // subtract offset from current position to fly at offset from target
+        const Vector3f &curr_pos = _inav.get_position() - _pos_offset_cm_neu;
 
         // get terrain altitude offset for origin and current position (i.e. change in terrain altitude from a position vs ekf origin)
         float terr_offset = 0.0f;
@@ -954,6 +959,7 @@ bool AC_WPNav::advance_spline_target_along_track(float dt)
         _spline_time_scale = _spline_vel_scaler / target_vel_length;
 
         // update target position
+        target_pos += _pos_offset_cm_neu;
         target_pos.z += terr_offset;
         _pos_control.set_pos_target(target_pos);
 
@@ -1130,4 +1136,18 @@ void AC_WPNav::wp_speed_update(float dt)
     
     // flag that wp leash must be recalculated
     _flags.recalc_wp_leash = true;
+}
+
+const Vector3f AC_WPNav::get_pos_target_offset() const
+{
+    return Vector3f(_pos_offset_cm_neu.x * 0.01f, _pos_offset_cm_neu.y * 0.01f, -_pos_offset_cm_neu.z * 0.01f);
+}
+
+/// set position target offset in meters in NED frame
+void AC_WPNav::set_pos_target_offset(const Vector3f& offset_ned)
+{
+    // convert from meters NED to cm NEU
+    _pos_offset_cm_neu.x = offset_ned.x * 100.0f;
+    _pos_offset_cm_neu.y = offset_ned.y * 100.0f;
+    _pos_offset_cm_neu.z = -offset_ned.z * 100.0f;
 }
