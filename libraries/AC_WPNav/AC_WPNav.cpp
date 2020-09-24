@@ -220,6 +220,9 @@ bool AC_WPNav::set_wp_destination(const Vector3f& destination, bool terrain_alt)
         _pos_control.get_stopping_point_z(origin);
     }
 
+    // account for offset
+    origin -= _pos_offset_cm_neu;
+
     // convert origin to alt-above-terrain
     if (terrain_alt) {
         float origin_terr_offset;
@@ -329,10 +332,10 @@ void AC_WPNav::shift_wp_origin_and_destination_to_current_pos_xy()
     const Vector3f& curr_pos = _inav.get_position();
 
     // shift origin and destination horizontally
-    _origin.x = curr_pos.x;
-    _origin.y = curr_pos.y;
-    _destination.x = curr_pos.x;
-    _destination.y = curr_pos.y;
+    _origin.x = curr_pos.x - _pos_offset_cm_neu.x;
+    _origin.y = curr_pos.y - _pos_offset_cm_neu.y;
+    _destination.x = _origin.x;
+    _destination.y = _origin.y;
 
     // move pos controller target horizontally
     _pos_control.set_xy_target(curr_pos.x, curr_pos.y);
@@ -352,10 +355,10 @@ void AC_WPNav::shift_wp_origin_and_destination_to_stopping_point_xy()
     get_wp_stopping_point_xy(stopping_point);
 
     // shift origin and destination horizontally
-    _origin.x = stopping_point.x;
-    _origin.y = stopping_point.y;
-    _destination.x = stopping_point.x;
-    _destination.y = stopping_point.y;
+    _origin.x = stopping_point.x - _pos_offset_cm_neu.x;
+    _origin.y = stopping_point.y - _pos_offset_cm_neu.y;
+    _destination.x = _origin.x;
+    _destination.y = _origin.y;
 
     // move pos controller target horizontally
     _pos_control.set_xy_target(stopping_point.x, stopping_point.y);
@@ -534,14 +537,14 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
 float AC_WPNav::get_wp_distance_to_destination() const
 {
     // get current location
-    const Vector3f &curr = _inav.get_position();
+    const Vector3f &curr = _inav.get_position() - _pos_offset_cm_neu;
     return norm(_destination.x-curr.x,_destination.y-curr.y);
 }
 
 /// get_wp_bearing_to_destination - get bearing to next waypoint in centi-degrees
 int32_t AC_WPNav::get_wp_bearing_to_destination() const
 {
-    return get_bearing_cd(_inav.get_position(), _destination);
+    return get_bearing_cd(_inav.get_position() - _pos_offset_cm_neu, _destination);
 }
 
 /// update_wpnav - run the wp controller - should be called at 100hz or higher

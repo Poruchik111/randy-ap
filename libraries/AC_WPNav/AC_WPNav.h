@@ -240,9 +240,10 @@ public:
     /// return the crosstrack_error - horizontal error of the actual position vs the desired position
     float crosstrack_error() const { return _track_error_xy;}
 
-    /// get or set position target offset in meters in NED frame
+    /// get, set or clear position target offset in meters in NED frame
     const Vector3f get_pos_target_offset() const;
     void set_pos_target_offset(const Vector3f& offset_ned);
+    void clear_pos_target_offset() { _pos_offset_cm_neu.zero(); }
 
     static const struct AP_Param::GroupInfo var_info[];
 
