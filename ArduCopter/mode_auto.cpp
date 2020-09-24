@@ -737,13 +737,30 @@ void ModeAuto::wp_run()
             auto_yaw.set_mode(AUTO_YAW_HOLD);
         }
 
-        // get pilot desired climb rate
+        // convert pilot throttle input to vertical offset
+        Vector3f offset_chg_ned;
         float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
         target_climb_rate = constrain_float(target_climb_rate, -wp_nav->get_default_speed_down(), wp_nav->get_default_speed_up());
         if (!is_zero(target_climb_rate)) {
+            offset_chg_ned.z -= target_climb_rate * 0.01f / copter.scheduler.get_loop_rate_hz();
+        }
+
+        // convert pilot roll and pitch inputs to horizontal offsets
+        float target_roll, target_pitch;
+        get_pilot_desired_lean_angles(target_roll, target_pitch, 4500, 4500);
+        if (!is_zero(target_roll)) {
+            offset_chg_ned.y = 5.0 * (target_roll / 4500.0f) / copter.scheduler.get_loop_rate_hz();
+        }
+        if (!is_zero(target_pitch)) {
+            offset_chg_ned.x = 5.0 * (target_pitch / 4500.0f) / copter.scheduler.get_loop_rate_hz();
+        }
+
+        // pass new offsets to waypoint library
+        if (!offset_chg_ned.is_zero()) {
             Vector3f offset_ned = wp_nav->get_pos_target_offset();
-            offset_ned.z -= target_climb_rate * 0.01f / copter.scheduler.get_loop_rate_hz();
-            offset_ned.z = constrain_float(offset_ned.z, -20.0f, 20.0f);
+            offset_ned.x = constrain_float(offset_ned.x + offset_chg_ned.x, -20, +20);
+            offset_ned.y = constrain_float(offset_ned.y + offset_chg_ned.y, -20, +20);
+            offset_ned.z = constrain_float(offset_ned.z + offset_chg_ned.z, -20, +20);
             wp_nav->set_pos_target_offset(offset_ned);
         }
     }
