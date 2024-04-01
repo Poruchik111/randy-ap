@@ -826,7 +826,7 @@ void Copter::set_compass_mean_heading()
     if (rtl_heading >= 360) {
       rtl_heading -= 360;
     }
-    gcs().send_text(MAV_SEVERITY_INFO, "%ld, set home heading", rtl_heading);
+    gcs().send_text(MAV_SEVERITY_INFO, "%d, set home heading", rtl_heading);
 }
 
 /*

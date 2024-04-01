@@ -383,8 +383,8 @@ void Copter::set_mode_RTL_or_compass_rtl_run(ModeReason reason)
     if (!set_mode(Mode::Number::RTL, reason)) {
         // set mode to land will trigger mode change notification to pilot
         set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
-           compass_rtl_run();
-           gcs().send_text(MAV_SEVERITY_CRITICAL,"Compass RTL, %ld", rtl_heading);
+        compass_rtl_run();
+           gcs().send_text(MAV_SEVERITY_CRITICAL,"Compass RTL, %d", rtl_heading);
     } else {
         // alert pilot to mode change
         AP_Notify::events.failsafe_mode_change = 1;
@@ -480,7 +480,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             set_mode_land_with_pause(reason);
             break;
         case FailsafeAction::RTL:
-            set_mode_RTL_or_compass_rtl_run(reason);
+            set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
@@ -535,20 +535,19 @@ if (!flightmode->in_guided_mode()) {
     AP_Stats *stats = AP::stats();
     uint32_t t = stats->get_flight_time_s();
 
-    if(copter.failsafe.radio) {
+    if(!copter.failsafe.radio) {
         flth = t;
-    
-    }else{
-        flth1 = t-flth;
-        flth2 = t;
     }
-
-    if (motors->armed() && !copter.position_ok()) {
-        if (t < (flth1+flth2)) {        
-            set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
-        }else{
-            set_mode(Mode::Number::ALT_HOLD, ModeReason::RADIO_FAILSAFE);
+   
+    set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
           
+    if (copter.failsafe.radio) {
+        if (t > (flth * 2)) {        
+            set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);          
         }
+    }
+    
+    if (position_ok()) {
+        set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
     }
 }

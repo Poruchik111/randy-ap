@@ -807,8 +807,6 @@ private:
     bool ampswitch = false;
     bool ampstate = false;
     uint32_t flth;
-    uint32_t flth1;
-    uint32_t flth2;
     uint32_t rtl_heading;
 
     // failsafe.cpp
