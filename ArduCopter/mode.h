@@ -464,7 +464,7 @@ public:
 
 protected:
 
-    const char *name() const override { return "ALT_HOLD"; }
+    const char *name() const override { return "ALT HOLD"; }
     const char *name4() const override { return "ALTH"; }
 
 private:
@@ -1353,7 +1353,7 @@ public:
     }
     void run(bool disarm_on_land);
 
-    bool requires_GPS() const override { return true; }
+    bool requires_GPS() const override { return false; }
     bool has_manual_throttle() const override { return false; }
     bool allows_arming(AP_Arming::Method method) const override { return false; };
     bool is_autopilot() const override { return true; }
@@ -1419,7 +1419,7 @@ private:
     void loiterathome_start();
     void loiterathome_run();
     void build_path();
-    void compute_return_target();
+    void compute_return_target(); 
 
     SubMode _state = SubMode::INITIAL_CLIMB;  // records state of rtl (initial climb, returning home, etc)
     bool _state_complete = false; // set to true if the current state is completed

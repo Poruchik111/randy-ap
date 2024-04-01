@@ -24,7 +24,7 @@
 
 // drag fusion on 2M boards
 #ifndef EK3_FEATURE_DRAG_FUSION
-#define EK3_FEATURE_DRAG_FUSION EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 1024
+#define EK3_FEATURE_DRAG_FUSION EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 500
 #endif
 
 // Beacon Fusion if beacon data available

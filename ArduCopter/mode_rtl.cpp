@@ -13,8 +13,11 @@
 bool ModeRTL::init(bool ignore_checks)
 {
     if (!ignore_checks) {
-        if (!AP::ahrs().home_is_set()) {
-            return false;
+        if (!copter.position_ok()) {
+           set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
+           copter.compass_rtl_run();
+           gcs().send_text(MAV_SEVERITY_CRITICAL,"Compass RTL, no GPS");
+           return false;
         }
     }
     // initialise waypoint and spline controller
@@ -63,7 +66,7 @@ ModeRTL::RTLAltType ModeRTL::get_alt_type() const
 // should be called at 100hz or more
 void ModeRTL::run(bool disarm_on_land)
 {
-    if (!motors->armed()) {
+    if (!motors->armed() || !copter.position_ok()) {
         return;
     }
 

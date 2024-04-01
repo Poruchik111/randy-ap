@@ -242,9 +242,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if AP_WINCH_ENABLED
     SCHED_TASK_CLASS(AP_Winch,             &copter.g2.winch,            update,          50,  50, 150),
 #endif
-#ifdef USERHOOK_FASTLOOP
-    SCHED_TASK(userhook_FastLoop,    100,     75, 153),
-#endif
+
+    SCHED_TASK(compass_rtl_run,    100,     75, 153),
+
 #ifdef USERHOOK_50HZLOOP
     SCHED_TASK(userhook_50Hz,         50,     75, 156),
 #endif
@@ -276,7 +276,6 @@ void Copter::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
 
 constexpr int8_t Copter::_failsafe_priorities[7];
 
-#if AP_SCRIPTING_ENABLED
 #if MODE_GUIDED_ENABLED == ENABLED
 // start takeoff to given altitude (for use by scripting)
 bool Copter::start_takeoff(float alt)
@@ -390,6 +389,7 @@ bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, flo
 }
 #endif
 
+#if AP_SCRIPTING_ENABLED
 #if MODE_CIRCLE_ENABLED == ENABLED
 // circle mode controls
 bool Copter::get_circle_radius(float &radius_m)
@@ -626,7 +626,8 @@ void Copter::three_hz_loop()
     failsafe_terrain_check();
 
     // check for deadreckoning failsafe
-    failsafe_deadreckon_check();
+   // failsafe_deadreckon_check();
+    RF_amp_power();
 
 #if AP_FENCE_ENABLED
     // check if we have breached a fence
@@ -816,6 +817,16 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
         rate_ef_targets = attitude_control->get_rate_ef_targets();
     }
     return true;
+}
+
+// Set during flight compass heading for non-GPS RTL
+void Copter::set_compass_mean_heading()
+{
+  rtl_heading = (ahrs.yaw_sensor / 100) + 180;
+    if (rtl_heading >= 360) {
+      rtl_heading -= 360;
+    }
+    gcs().send_text(MAV_SEVERITY_INFO, "%ld, set home heading", rtl_heading);
 }
 
 /*

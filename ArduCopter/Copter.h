@@ -383,7 +383,7 @@ private:
             uint8_t unused3                 : 1; // 25      // was compass_init_location; true when the compass's initial location has been set
             uint8_t unused2                 : 1; // 26      // aux switch rc_override is allowed
             uint8_t armed_with_airmode_switch : 1; // 27      // we armed using a arming switch
-            uint8_t prec_land_active        : 1; // 28      // true if precland is active
+            uint8_t prec_land_active        : 1; // 28      // true if precland is active            
         };
         uint32_t value;
     } ap_t;
@@ -669,8 +669,10 @@ private:
     void get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
                              uint8_t &task_count,
                              uint32_t &log_bit) override;
-#if AP_SCRIPTING_ENABLED
-#if MODE_GUIDED_ENABLED == ENABLED
+
+
+  
+    #if MODE_GUIDED_ENABLED == ENABLED
     bool start_takeoff(float alt) override;
     bool set_target_location(const Location& target_loc) override;
     bool set_target_pos_NED(const Vector3f& target_pos, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool yaw_relative, bool terrain_alt) override;
@@ -680,6 +682,7 @@ private:
     bool set_target_velaccel_NED(const Vector3f& target_vel, const Vector3f& target_accel, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool relative_yaw) override;
     bool set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs) override;
 #endif
+#if AP_SCRIPTING_ENABLED
 #if MODE_CIRCLE_ENABLED == ENABLED
     bool get_circle_radius(float &radius_m) override;
     bool set_circle_rate(float rate_dps) override;
@@ -713,6 +716,9 @@ private:
     bool get_wp_bearing_deg(float &bearing) const override;
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
+    void set_compass_mean_heading();
+
+  
 
     // Attitude.cpp
     void update_throttle_hover();
@@ -788,7 +794,7 @@ private:
     void failsafe_terrain_on_event();
     void gpsglitch_check();
     void failsafe_deadreckon_check();
-    void set_mode_RTL_or_land_with_pause(ModeReason reason);
+    void set_mode_RTL_or_compass_rtl_run(ModeReason reason);
     void set_mode_SmartRTL_or_RTL(ModeReason reason);
     void set_mode_SmartRTL_or_land_with_pause(ModeReason reason);
     void set_mode_auto_do_land_start_or_RTL(ModeReason reason);
@@ -796,6 +802,14 @@ private:
     bool should_disarm_on_failsafe();
     void do_failsafe_action(FailsafeAction action, ModeReason reason);
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);
+    void RF_amp_power();
+    void compass_rtl_run();
+    bool ampswitch = false;
+    bool ampstate = false;
+    uint32_t flth;
+    uint32_t flth1;
+    uint32_t flth2;
+    uint32_t rtl_heading;
 
     // failsafe.cpp
     void failsafe_enable();
