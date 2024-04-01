@@ -525,28 +525,27 @@ void Copter::RF_amp_power()
             gcs().send_text(MAV_SEVERITY_WARNING, "RF AMP OFF");
         }
     }
+    AP_Stats *stats = AP::stats();
+    flt = stats->get_flight_time_s();
+
+    if(!copter.failsafe.radio) {
+        flth = flt;
+    }
 }
 
 // No GPS compass RTL func
 void Copter::compass_rtl_run() {
 if (!flightmode->in_guided_mode()) {
     return;
-}
-    AP_Stats *stats = AP::stats();
-    uint32_t t = stats->get_flight_time_s();
-
-    if(!copter.failsafe.radio) {
-        flth = t;
-    }
-   
+}   
     set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
           
     if (copter.failsafe.radio) {
-        if (t > (flth * 2)) {        
+        if (flt > (flth * 2)) {        
             set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);          
         }
     }
-    
+
     if (position_ok()) {
         set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
     }
