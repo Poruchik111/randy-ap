@@ -822,11 +822,16 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
 // Set during flight compass heading for non-GPS RTL
 void Copter::set_compass_mean_heading()
 {
-  rtl_heading = (ahrs.yaw_sensor / 100) + 180;
+    // if we are in Compass RTL we can't change home course.
+    if(flightmode->in_guided_mode()) {
+        return;
+    }
+
+    rtl_heading = (ahrs.yaw_sensor / 100) + 180;
     if (rtl_heading >= 360) {
       rtl_heading -= 360;
     }
-    gcs().send_text(MAV_SEVERITY_INFO, "%d, set home heading", rtl_heading);
+    gcs().send_text(MAV_SEVERITY_WARNING, "%d, set home heading", rtl_heading);
 }
 
 /*

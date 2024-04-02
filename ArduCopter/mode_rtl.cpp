@@ -16,7 +16,7 @@ bool ModeRTL::init(bool ignore_checks)
         if (!copter.position_ok()) {
            set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
            copter.compass_rtl_run();
-           gcs().send_text(MAV_SEVERITY_CRITICAL,"Compass RTL, no GPS");
+           gcs().send_text(MAV_SEVERITY_WARNING,"Compass RTL, no GPS");
            return false;
         }
     }

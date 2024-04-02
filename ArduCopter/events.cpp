@@ -530,9 +530,12 @@ void Copter::RF_amp_power()
 
     if(!copter.failsafe.radio) {
         flth = flt;
-    }
+    }else{
+     if (flt > (flth * 2)){
+        flte = true;
+     }
 }
-
+}
 // No GPS compass RTL func
 void Copter::compass_rtl_run() {
 if (!flightmode->in_guided_mode()) {
@@ -541,12 +544,13 @@ if (!flightmode->in_guided_mode()) {
     set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
           
     if (copter.failsafe.radio) {
-        if (flt > (flth * 2)) {        
+        if (flte) {        
             set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);          
         }
     }
 
-    if (position_ok()) {
+    if (ahrs.have_inertial_nav()) {
         set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
     }
 }
+
