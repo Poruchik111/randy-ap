@@ -2884,6 +2884,11 @@ bool AP_AHRS::_get_origin(Location &ret) const
 
 bool AP_AHRS::set_home(const Location &loc)
 {
+    //No allow set home inflight
+    if (hal.util->get_soft_armed()){
+        return false;
+    }
+
     WITH_SEMAPHORE(_rsem);
     // check location is valid
     if (loc.lat == 0 && loc.lng == 0 && loc.alt == 0) {

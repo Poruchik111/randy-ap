@@ -809,7 +809,7 @@ private:
     bool flte = false;
     uint32_t flth;
     uint32_t flt;
-    uint32_t rtl_heading;
+    int32_t rtl_heading;
 
     // failsafe.cpp
     void failsafe_enable();
