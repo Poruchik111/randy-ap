@@ -831,7 +831,7 @@ void Copter::set_compass_mean_heading()
     if (rtl_heading >= 360) {
       rtl_heading -= 360;
     }
-    gcs().send_text(MAV_SEVERITY_ALERT, "%li Deg Home heading set", rtl_heading);
+    gcs().send_text(MAV_SEVERITY_ALERT, "%i Deg Home heading set", rtl_heading);
 }
 
 /*
