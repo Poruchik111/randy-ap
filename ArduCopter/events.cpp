@@ -526,10 +526,21 @@ void Copter::RF_amp_power()
     }
     //Switch sourse set at "low speed alt" to use optical flow if OpFlow Enabled
     #if AP_OPTICALFLOW_ENABLED == ENABLED
-    if (( baro_alt <= g2.land_alt_low) && rangefinder_alt_ok() && optflow.healthy()) {
-        AP::ahrs().set_posvelyaw_source_set(1);
+
+    if ((baro_alt <= g2.land_alt_low) && rangefinder_alt_ok() && optflow.healthy()) {
+        source_sw = 1;         
     }else{
-        AP::ahrs().set_posvelyaw_source_set(0);
+        source_sw = 0;
+    }
+
+    if (AP::ahrs().get_posvelyaw_source_set() != source_sw) {
+        AP::ahrs().set_posvelyaw_source_set(source_sw);
+        if (AP::ahrs().get_posvelyaw_source_set() == 0){
+            gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Disabled");
+        if (AP::ahrs().get_posvelyaw_source_set() == 1){
+            gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Enabled");
+        }
+        }
     }
     #endif
 

@@ -811,6 +811,7 @@ private:
     uint32_t flth;
     uint32_t flt;
     int16_t rtl_heading;
+    int8_t source_sw; // source set 0-2
 
     // failsafe.cpp
     void failsafe_enable();
