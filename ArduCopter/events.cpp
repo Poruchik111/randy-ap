@@ -477,7 +477,9 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             set_mode_land_with_pause(reason);
             break;
         case FailsafeAction::RTL:
+        if (!flightmode->is_landing()) {
             set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
+            }
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
@@ -522,33 +524,43 @@ void Copter::RF_amp_power()
             gcs().send_text(MAV_SEVERITY_WARNING, "RF amp OFF");
         }
     }
+    //Switch sourse set at "low speed alt" to use optical flow if OpFlow Enabled
+    #if AP_OPTICALFLOW_ENABLED == ENABLED
+    if (( baro_alt <= g2.land_alt_low) && rangefinder_alt_ok() && optflow.healthy()) {
+        AP::ahrs().set_posvelyaw_source_set(1);
+    }else{
+        AP::ahrs().set_posvelyaw_source_set(0);
+    }
+    #endif
+
     AP_Stats *stats = AP::stats();
     flt = stats->get_flight_time_s();
 
     if(!copter.failsafe.radio) {
         flth = flt;
     }else{
-     if (flt > (flth * 2)){
+        if (flt >= (flth * 1.7)){
         flte = true;
-     }
+    }
+    }
 }
-}
+
 // No GPS compass RTL func
 void Copter::compass_rtl_run() {
 if (!flightmode->in_guided_mode()) {
     return;
 }   
-    if (baro_alt < 35000){
+    if (baro_alt <= 35000){
         set_target_angle_and_climbrate(0,-20,rtl_heading,4,true,45);
     }else{
         set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
     }
-          
+// Compass RTL when Radiofailsafe (2 stage- 1/2 of flight time with climb up, if no RC - 2-d stage on)    
     if (copter.failsafe.radio && flte) {
-    if (baro_alt < 35000){
+    if (baro_alt <= 35000){
         set_target_angle_and_climbrate(0,0,rtl_heading,4,true,45);
     }else{
-        set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);          
+        set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);         
     }
     }
     
