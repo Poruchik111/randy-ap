@@ -527,29 +527,36 @@ void Copter::RF_amp_power()
     //Switch sourse set at "low speed alt" to use optical flow if OpFlow Enabled
     #if AP_OPTICALFLOW_ENABLED == ENABLED
 
-    if ((baro_alt <= g2.land_alt_low) && rangefinder_alt_ok() && optflow.healthy()) {
-        source_sw = 1;         
+    if ((baro_alt <= g2.land_alt_low) && rangefinder_state.alt_healthy && optflow.healthy()) {
+        source_sw = 1; //with opflow    
     }else{
-        source_sw = 0;
+        source_sw = 0; //without opflow
     }
 
     if (AP::ahrs().get_posvelyaw_source_set() != source_sw) {
         AP::ahrs().set_posvelyaw_source_set(source_sw);
-        if (AP::ahrs().get_posvelyaw_source_set() == 0){
-            gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Disabled");
-        if (AP::ahrs().get_posvelyaw_source_set() == 1){
+        if (source_sw == 1){
             gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Enabled");
+            if (flightmode->mode_number() == Mode::Number::ALT_HOLD){
+                set_mode(Mode::Number::LOITER, ModeReason::EKF_FAILSAFE);  
+            }
+        }else{
+            gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Disabled");
         }
-        }
+        
     }
     #endif
 
     AP_Stats *stats = AP::stats();
-    flt = stats->get_flight_time_s();
+    flt = stats->get_flight_time_s(); //need correction!!!
 
     if(!copter.failsafe.radio) {
-        flth = flt;
+        flth = flt - fltrc; //last flight time in RC
+        flte2 = flt; // time when RC fail
     }else{
+        fltrc = flt;// time when RC ok
+        fltfs = flt - flte2; //time we flying in Compass RTL
+       
         if (flt >= (flth * 1.7)){
         flte = true;
     }

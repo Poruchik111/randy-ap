@@ -39,13 +39,8 @@ void ModeAltHold::run()
 
     // get pilot desired climb rate
     float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
-    
-    if (copter.baro_alt > g2.land_alt_low) {
-        target_climb_rate = constrain_float(target_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
-    }else{
-        target_climb_rate = constrain_float(target_climb_rate, get_pilot_speed_dn(), g.land_speed); 
-    }
-
+    target_climb_rate = constrain_float(target_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
+ 
     // Alt Hold State Machine Determination
     AltHoldModeState althold_state = get_alt_hold_state(target_climb_rate);
 

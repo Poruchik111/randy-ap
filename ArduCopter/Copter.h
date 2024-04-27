@@ -810,6 +810,8 @@ private:
     bool flte2 = false;
     uint32_t flth;
     uint32_t flt;
+    uint32_t fltfs;
+    uint32_t fltrc;
     int16_t rtl_heading;
     int8_t source_sw; // source set 0-2
 
