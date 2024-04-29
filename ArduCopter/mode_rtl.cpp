@@ -74,13 +74,31 @@ void ModeRTL::run(bool disarm_on_land)
     if (_state_complete) {
         switch (_state) {
         case SubMode::STARTING:
+
+         if (!copter.position_ok()) {
+            set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
+            copter.compass_rtl_run();
+            gcs().send_text(MAV_SEVERITY_WARNING,"Compass RTL, no GPS");
+        }
             build_path();
             climb_start();
             break;
         case SubMode::INITIAL_CLIMB:
+
+        if (!copter.position_ok()) {
+            set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
+            copter.compass_rtl_run();
+            gcs().send_text(MAV_SEVERITY_WARNING,"Compass RTL, no GPS");
+        }
             return_start();
             break;
         case SubMode::RETURN_HOME:
+        
+        if (!copter.position_ok()) {
+            set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::GPS_GLITCH);
+            copter.compass_rtl_run();
+            gcs().send_text(MAV_SEVERITY_WARNING,"Compass RTL, no GPS");
+        }
             loiterathome_start();
             break;
         case SubMode::LOITER_AT_HOME:

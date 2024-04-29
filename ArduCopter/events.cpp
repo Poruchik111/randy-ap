@@ -528,54 +528,62 @@ void Copter::RF_amp_power()
     #if AP_OPTICALFLOW_ENABLED == ENABLED
 
     if ((baro_alt <= g2.land_alt_low) && rangefinder_state.alt_healthy && optflow.healthy()) {
-        source_sw = 1; //with opflow    
-    }else{
+        source_sw = 1; //with opflow 
+    }
+    if ((baro_alt > g2.land_alt_low) || !rangefinder_state.alt_healthy || !optflow.healthy()) {
         source_sw = 0; //without opflow
+    }
+
+    if (!motors->armed() && (flightmode->mode_number() == Mode::Number::ALT_HOLD)){
+        set_mode(Mode::Number::FLOWHOLD, ModeReason::EKF_FAILSAFE);
     }
 
     if (AP::ahrs().get_posvelyaw_source_set() != source_sw) {
         AP::ahrs().set_posvelyaw_source_set(source_sw);
         if (source_sw == 1){
             gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Enabled");
-            if (flightmode->mode_number() == Mode::Number::ALT_HOLD){
-                set_mode(Mode::Number::LOITER, ModeReason::EKF_FAILSAFE);  
+            if (flightmode->mode_number() == Mode::Number::ALT_HOLD) {
+                set_mode(Mode::Number::FLOWHOLD, ModeReason::EKF_FAILSAFE);  
             }
         }else{
             gcs().send_text(MAV_SEVERITY_WARNING, "Optic Stab Disabled");
+             if (!set_mode(Mode::Number::LOITER, ModeReason::EKF_FAILSAFE)) {
+                set_mode(Mode::Number::ALT_HOLD, ModeReason::EKF_FAILSAFE);  
+            }
         }
-        
     }
     #endif
 
     AP_Stats *stats = AP::stats();
-    flt = stats->get_flight_time_s(); //need correction!!!
+    flt = stats->get_flight_time_s();
 
     if(!copter.failsafe.radio) {
         flth = flt - fltrc; //last flight time in RC
-        flte2 = flt; // time when RC fail
+        fltnorc = flt; // time when RC fail
+        flte = false;
     }else{
+        fltfs = flt - fltnorc; //time we flying in Compass RTL
         fltrc = flt;// time when RC ok
-        fltfs = flt - flte2; //time we flying in Compass RTL
-       
-        if (flt >= (flth * 1.7)){
+        if (fltfs > (flth * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 0.1f, 0.0f, UINT32_MAX))))) {
         flte = true;
-    }
+        }
     }
 }
+
 
 // No GPS compass RTL func
 void Copter::compass_rtl_run() {
 if (!flightmode->in_guided_mode()) {
     return;
 }   
-    if (baro_alt <= 35000){
+    if (baro_alt <= g.rtl_altitude){
         set_target_angle_and_climbrate(0,-20,rtl_heading,4,true,45);
     }else{
         set_target_angle_and_climbrate(0,-20,rtl_heading,0,true,45);
     }
 // Compass RTL when Radiofailsafe (2 stage- 1/2 of flight time with climb up, if no RC - 2-d stage on)    
     if (copter.failsafe.radio && flte) {
-    if (baro_alt <= 35000){
+    if (baro_alt <= g.rtl_altitude){
         set_target_angle_and_climbrate(0,0,rtl_heading,4,true,45);
     }else{
         set_target_angle_and_climbrate(0,0,rtl_heading,0,true,45);         

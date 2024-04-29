@@ -479,7 +479,7 @@ public:
     // inherit constructor
     using Mode::Mode;
     Number mode_number() const override { return auto_RTL? Number::AUTO_RTL : Number::AUTO; }
-
+ 
     bool init(bool ignore_checks) override;
     void exit() override;
     void run() override;

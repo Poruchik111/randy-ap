@@ -179,7 +179,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if HAL_SPRAYER_ENABLED
     SCHED_TASK_CLASS(AC_Sprayer,           &copter.sprayer,               update,         3,  90,  54),
 #endif
-    SCHED_TASK(three_hz_loop,          3,     75, 57),
+    SCHED_TASK(three_hz_loop,          3,     100, 57),
 #if AP_SERVORELAYEVENTS_ENABLED
     SCHED_TASK_CLASS(AP_ServoRelayEvents,  &copter.ServoRelayEvents,      update_events, 50,  75,  60),
 #endif
@@ -212,7 +212,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_Camera,            &copter.camera,              update,          50,  75, 111),
 #endif
 #if HAL_LOGGING_ENABLED
-    SCHED_TASK(ten_hz_logging_loop,   10,    350, 114),
+    SCHED_TASK(ten_hz_logging_loop,   10,    400, 114),
     SCHED_TASK(twentyfive_hz_logging, 25,    110, 117),
     SCHED_TASK_CLASS(AP_Logger,            &copter.logger,              periodic_tasks, 400, 300, 120),
 #endif
@@ -243,7 +243,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_Winch,             &copter.g2.winch,            update,          50,  50, 150),
 #endif
 
-    SCHED_TASK(compass_rtl_run,    100,     75, 153),
+    SCHED_TASK(compass_rtl_run,    100,     40, 153),
 
 #ifdef USERHOOK_50HZLOOP
     SCHED_TASK(userhook_50Hz,         50,     75, 156),

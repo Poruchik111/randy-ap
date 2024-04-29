@@ -807,7 +807,7 @@ private:
     bool ampswitch = false;
     bool ampstate = false;
     bool flte = false;
-    bool flte2 = false;
+    uint32_t fltnorc;
     uint32_t flth;
     uint32_t flt;
     uint32_t fltfs;
