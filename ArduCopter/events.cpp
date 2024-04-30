@@ -528,7 +528,7 @@ void Copter::RF_amp_power()
     #if AP_OPTICALFLOW_ENABLED == ENABLED
 
     if ((baro_alt <= g2.land_alt_low) && rangefinder_state.alt_healthy && optflow.healthy()) {
-        source_sw = 1; //with opflow 
+        source_sw = 1; //with opflow AP_OPTICAL
     }
     if ((baro_alt > g2.land_alt_low) || !rangefinder_state.alt_healthy || !optflow.healthy()) {
         source_sw = 0; //without opflow
