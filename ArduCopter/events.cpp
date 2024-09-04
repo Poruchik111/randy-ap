@@ -506,23 +506,23 @@ void Copter::goup()
     return;
 }   
     if (baro_alt < 28000){
-        set_target_angle_and_climbrate(0,0,0,8,false,0);
+        set_angle_and_climbrate(0,0,0,8,false,0);
         
     if (baro_alt > 30000){
-        set_target_angle_and_climbrate(0,0,0,0,false,0);
+        set_angle_and_climbrate(0,0,0,0,false,0);
     }
     }    
 }
 
 void Copter::ignition_timer()
 {
-   const uint32_t time_ms = AP_HAL::millis();
+   const uint32_t time_msec = AP_HAL::millis();
 
     // safety timer check/start
     if (p_safety_sw.active != motors->armed()) {
         p_safety_sw.active = motors->armed();
         if (p_safety_sw.active) {
-            p_safety_sw.start_ms = time_ms;
+            p_safety_sw.start_ms = time_msec;
             gcs().send_text(MAV_SEVERITY_INFO,"Armed, Timer 60 sec");
         } else {
             p_safety_sw.start_ms = 0;
@@ -532,7 +532,7 @@ void Copter::ignition_timer()
     
     // check for timeout
     if (p_safety_sw.active && !p_safety_sw.timeout) {
-        if (time_ms - p_safety_sw.start_ms > 60000) {
+        if (time_msec - p_safety_sw.start_ms > 60000) {
             p_safety_sw.timeout = true;
             gcs().send_text(MAV_SEVERITY_INFO,"Timer Off, Check Safe switch");
         }
@@ -542,7 +542,7 @@ void Copter::ignition_timer()
     if ((selfboom.active != failsafe.radio) && p_safety_sw.timeout){ 
             selfboom.active = failsafe.radio;  
         if (selfboom.active){
-            selfboom.start_ms = time_ms;
+            selfboom.start_ms = time_msec;
         }else{
             selfboom.start_ms = 0;
             selfboom.timeout = false;
@@ -550,7 +550,7 @@ void Copter::ignition_timer()
     }
     
     if (selfboom.active && !selfboom.timeout) {
-        if (time_ms - selfboom.start_ms > 120000) {
+        if (time_msec - selfboom.start_ms > 120000) {
            gcs().send_text(MAV_SEVERITY_INFO, "Selfdestroyed");
            copter.relay.on(0);
            copter.relay.on(1);
