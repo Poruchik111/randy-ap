@@ -43,18 +43,12 @@ void AP_Gripper_Servo::grab()
     LOGGER_WRITE_EVENT(LogEvent::GRIPPER_GRAB);
 }
 
+
 void AP_Gripper_Servo::release()
 {
     // check if we are already releasing
     if (config.state == AP_Gripper::STATE_RELEASING) {
         // do nothing
-        return;
-    }
-
-    // check if we are already released
-    if (config.state == AP_Gripper::STATE_RELEASED) {
-        // inform user that we are already released
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Gripper load released");
         return;
     }
     
@@ -65,7 +59,6 @@ void AP_Gripper_Servo::release()
     SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, config.release_pwm);
     _last_grab_or_release = AP_HAL::millis();
     GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Gripper load releasing");
-    LOGGER_WRITE_EVENT(LogEvent::GRIPPER_RELEASE);
 }
 
 bool AP_Gripper_Servo::has_state_pwm(const uint16_t pwm) const
@@ -85,6 +78,9 @@ bool AP_Gripper_Servo::has_state_pwm(const uint16_t pwm) const
         // servo still moving....
         return false;
     }
+        //set PWM 0 after servo released
+    SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, config.neutral_pwm);
+
     return true;
 }
 
@@ -93,21 +89,14 @@ bool AP_Gripper_Servo::released() const
     return (config.state == AP_Gripper::STATE_RELEASED);
 }
 
-bool AP_Gripper_Servo::grabbed() const
-{
-    return (config.state == AP_Gripper::STATE_GRABBED);
-}
-
 // type-specific periodic updates:
 void AP_Gripper_Servo::update_gripper()
 {
-    // Check for successful grabbed or released
-    if (config.state == AP_Gripper::STATE_GRABBING && has_state_pwm(config.grab_pwm)) {
-        config.state = AP_Gripper::STATE_GRABBED;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Gripper load grabbed");
-    } else if (config.state == AP_Gripper::STATE_RELEASING && has_state_pwm(config.release_pwm)) {
+    // Check for successful  released
+   
+    if (config.state == AP_Gripper::STATE_RELEASING && has_state_pwm(config.release_pwm)) {
         config.state = AP_Gripper::STATE_RELEASED;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Gripper load released");
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Gripper load released 82");
     }
 }
 

@@ -537,7 +537,8 @@ void Copter::ignition_timer()
             gcs().send_text(MAV_SEVERITY_INFO,"Timer Off, Check Safe switch");
         }
     } 
-    
+
+    if(AP::boardConfig())
     // Self-destroyer timer 3 min
     if ((selfboom.active != failsafe.radio) && p_safety_sw.timeout){ 
             selfboom.active = failsafe.radio;  

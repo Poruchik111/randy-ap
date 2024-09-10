@@ -439,6 +439,13 @@ const AP_Param::Info Copter::var_info[] = {
     GSCALAR(acro_trainer,   "ACRO_TRAINER",     (uint8_t)ModeAcro::Trainer::LIMITED),
 #endif
 
+    // @Param: DRONE_TYPE
+    // @DisplayName: Drone Type
+    // @Description: Drone Type- kamikadze or Bomber
+    // @Values: 0:Kamikadze,1:Bomber
+    // @User: Advanced
+    GSCALAR(drone_type, "DRONE_TYPE" ,  0),
+    
     // variables not in the g class which contain EEPROM saved variables
 
 #if AP_CAMERA_ENABLED
