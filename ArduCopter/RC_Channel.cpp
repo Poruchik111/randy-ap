@@ -315,7 +315,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
 //#if PARACHUTE == ENABLED
         switch (ch_flag) {
             case AuxSwitchPos::HIGH:
-            copter.hw_safety_sw = true;
+            copter.hw_safety_sw = true;            
                if(copter.motors->armed()) {
                GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE ON, WEAPON DISARMED");
                }
@@ -332,7 +332,10 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                }else{
                GCS_SEND_TEXT(MAV_SEVERITY_INFO,"!!! WEAPON ARMED !!!"); 
                }
+            }else{
+               GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE OFF"); 
             }
+            
             break;
         }
 //#endif
@@ -342,17 +345,21 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
 
             switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
-                copter.hw_boom_sw = true;
                 if (copter.motors->armed()) {
+                    if (copter.p_safety_sw.timeout && !copter.hw_safety_sw) {
+                    copter.hw_boom_sw = true;
+                    }
                     if (copter.p_safety_sw.timeout && copter.hw_safety_sw) {
-                    GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFETY SWITCH!");
+                    GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE SWITCH!");
                     }
                     if (!copter.p_safety_sw.timeout && !copter.hw_safety_sw) {
-                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"MANUAL BLAST- WAIT TIMER");
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE OFF");
                     }
                     if (!copter.p_safety_sw.timeout && copter.hw_safety_sw) {
-                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFETY SWITCH ON!");
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE SWITCH ON");
                     }
+                }else{
+                    GCS_SEND_TEXT(MAV_SEVERITY_INFO,"MANUAL BLAST CHANNEL");
                 }
             break;
 
@@ -370,16 +377,34 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
 
             // Parachute disable, enable, release with 3 position switch
             switch (ch_flag) {
-                case AuxSwitchPos::LOW:
-                  
+                case AuxSwitchPos::HIGH:
+                    copter.release = true;
+                    copter.bomb_release();
+                if (copter.motors->armed()) {
+                    if (copter.p_safety_sw.timeout && !copter.hw_safety_sw) {
+                    copter.release = true;
+                    copter.bomb_release();
+                    }
+                    if (copter.p_safety_sw.timeout && copter.hw_safety_sw) {
+                    GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE SWITCH!");
+                    }
+                    if (!copter.p_safety_sw.timeout && !copter.hw_safety_sw) {
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE OFF");
+                    }
+                    if (!copter.p_safety_sw.timeout && copter.hw_safety_sw) {
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE SWITCH ON");
+                    }
+                }else{
+                    GCS_SEND_TEXT(MAV_SEVERITY_INFO,"BOMB DROPE CHANNEL");
+                }
                     break;
 
                 case AuxSwitchPos::MIDDLE:
                 
                     break;
 
-                case AuxSwitchPos::HIGH:
-                  
+                case AuxSwitchPos::LOW:
+                
                     break;
             }
             break;

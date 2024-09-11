@@ -438,7 +438,11 @@ private:
 
     uint8_t hw_safety_sw;
     uint8_t hw_boom_sw;
-    
+    uint8_t releasing = false;
+    uint8_t release_timeout;
+    uint32_t last_release;
+    uint8_t released;
+    uint8_t release;
 
     // Motor Output
     MOTOR_CLASS *motors;
@@ -817,6 +821,7 @@ private:
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);
     void ignition_timer();
     void ignition();
+    void bomb_release();
    // Guided non GPS mode in Land with pause to up to RTL ALT
     void goup();
     // failsafe.cpp

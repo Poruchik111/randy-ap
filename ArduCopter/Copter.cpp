@@ -245,9 +245,6 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(goup,                100,     75, 153),
     SCHED_TASK(ignition,            400,     75, 156),
 
-#ifdef USERHOOK_MEDIUMLOOP
-    SCHED_TASK(userhook_MediumLoop,   10,     75, 159),
-#endif
 #ifdef USERHOOK_SLOWLOOP
     SCHED_TASK(userhook_SlowLoop,      3.3,   75, 162),
 #endif
@@ -648,6 +645,7 @@ void Copter::three_hz_loop()
 
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
+    bomb_release();
 }
 
 // one_hz_loop - runs at 1Hz

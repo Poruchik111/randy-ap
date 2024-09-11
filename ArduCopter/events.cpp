@@ -472,10 +472,14 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
         case FailsafeAction::NONE:
             return;
         case FailsafeAction::LAND:
-            set_mode_land_with_pause(reason);
+            set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE);
             break;
         case FailsafeAction::RTL:
-            set_mode_RTL_or_land_with_pause(reason);
+            if (hw_safety_sw){
+            set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE); 
+            }else{
+            set_mode_land_with_pause(reason);
+            }
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
@@ -505,6 +509,10 @@ void Copter::goup()
     if ((!flightmode->in_guided_mode()) && !copter.failsafe.radio) {
     return;
 }   
+    if (!released){
+    bomb_release(); // drope bomb if we are in RC Fail + RTL
+    }
+
     if (baro_alt < 28000){
         set_angle_and_climbrate(0,0,0,8,false,0);
         
@@ -516,13 +524,13 @@ void Copter::goup()
 
 void Copter::ignition_timer()
 {
-   const uint32_t time_msec = AP_HAL::millis();
+   const uint32_t time_ms = AP_HAL::millis();
 
     // safety timer check/start
     if (p_safety_sw.active != motors->armed()) {
         p_safety_sw.active = motors->armed();
         if (p_safety_sw.active) {
-            p_safety_sw.start_ms = time_msec;
+            p_safety_sw.start_ms = time_ms;
             gcs().send_text(MAV_SEVERITY_INFO,"Armed, Timer 60 sec");
         } else {
             p_safety_sw.start_ms = 0;
@@ -532,18 +540,18 @@ void Copter::ignition_timer()
     
     // check for timeout
     if (p_safety_sw.active && !p_safety_sw.timeout) {
-        if (time_msec - p_safety_sw.start_ms > 60000) {
+        if (time_ms - p_safety_sw.start_ms > 60000) {
             p_safety_sw.timeout = true;
             gcs().send_text(MAV_SEVERITY_INFO,"Timer Off, Check Safe switch");
         }
     } 
 
-    if(AP::boardConfig())
+    if(g.drone_type ==0){
     // Self-destroyer timer 3 min
     if ((selfboom.active != failsafe.radio) && p_safety_sw.timeout){ 
             selfboom.active = failsafe.radio;  
         if (selfboom.active){
-            selfboom.start_ms = time_msec;
+            selfboom.start_ms = time_ms;
         }else{
             selfboom.start_ms = 0;
             selfboom.timeout = false;
@@ -551,20 +559,25 @@ void Copter::ignition_timer()
     }
     
     if (selfboom.active && !selfboom.timeout) {
-        if (time_msec - selfboom.start_ms > 120000) {
+        if (time_ms - selfboom.start_ms > 120000) {
            gcs().send_text(MAV_SEVERITY_INFO, "Selfdestroyed");
            copter.relay.on(0);
            copter.relay.on(1);
         }
     }
 }
+}
 
 void Copter::ignition()
 {
- // Inertial and manual Boom
+ // Inertial and manual Boom for Kamikadze
+    if(g.drone_type !=0){
+    return;
+    }
+
     Vector3f accel_ig = ahrs.get_accel_ef();
 
-    if (motors->armed() && p_safety_sw.timeout && !copter.hw_safety_sw) {
+    if (motors->armed() && p_safety_sw.timeout && !hw_safety_sw) {
 
         if ((accel_ig.x <= -45) || (accel_ig.z <= -90)) {
             hal.gpio->write(56, 1);
@@ -574,9 +587,41 @@ void Copter::ignition()
         if (copter.hw_boom_sw) {            
             gcs().send_text(MAV_SEVERITY_INFO, "Manual Blast");
             hal.gpio->write(56, 1);
-            hal.gpio->write(57, 1);
-            
-        }
-       
+            hal.gpio->write(57, 1);   
+        }       
     }
-}   
+}
+
+
+void Copter::bomb_release()
+{
+    if (g.drone_type != 1) { // drone_type Bomber
+    return;
+    }
+
+    const uint32_t release_time = AP_HAL::millis();
+
+   if (releasing != release) {
+       releasing = release;
+       if (releasing){
+        last_release = release_time;
+        
+       }else{
+        last_release = 0;
+        release_timeout = false;
+       }
+   }
+   
+    if (releasing && !release_timeout){
+        if (release_time - last_release > 1500){
+            release_timeout = true;
+            releasing = false;
+            released = true;
+            //set PWM 0 after servo released
+            SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+        }else{
+            // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1000);
+        }
+    }
+    }
