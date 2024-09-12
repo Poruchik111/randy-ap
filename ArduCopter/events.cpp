@@ -81,18 +81,16 @@ void Copter::failsafe_radio_on_event()
 // failsafe_off_event - respond to radio contact being regained
 void Copter::failsafe_radio_off_event()
 {
-    set_mode(Mode::Number::ALT_HOLD, ModeReason::RADIO_FAILSAFE);
     // user can now override roll, pitch, yaw and throttle and even use flight mode switch to restore previous flight mode
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_RADIO, LogErrorCode::FAILSAFE_RESOLVED);
-    gcs().send_text(MAV_SEVERITY_WARNING, "RC OK, Flight Mode ATTI");
 }
 
 void Copter::announce_failsafe(const char *type, const char *action_undertaken)
 {
     if (action_undertaken != nullptr) {
-        gcs().send_text(MAV_SEVERITY_WARNING, "%s Lost - %s", type, action_undertaken);
+        gcs().send_text(MAV_SEVERITY_WARNING, "%s LOW - %s", type, action_undertaken);
     } else {
-        gcs().send_text(MAV_SEVERITY_WARNING, "%s Lost", type);
+        gcs().send_text(MAV_SEVERITY_WARNING, "%s LOW", type);
     }
 }
 
@@ -510,7 +508,9 @@ void Copter::goup()
     return;
 }   
     if (!released){
-    bomb_release(); // drope bomb if we are in RC Fail + RTL
+        copter.release = true;
+        bomb_release(); // drope bomb if we are in RC Fail + RTL
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB DROPPED!");
     }
 
     if (baro_alt < 28000){
@@ -604,8 +604,7 @@ void Copter::bomb_release()
    if (releasing != release) {
        releasing = release;
        if (releasing){
-        last_release = release_time;
-        
+        last_release = release_time;        
        }else{
         last_release = 0;
         release_timeout = false;
@@ -613,15 +612,17 @@ void Copter::bomb_release()
    }
    
     if (releasing && !release_timeout){
-        if (release_time - last_release > 1500){
+                    // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1000);
+       
+        if (release_time - last_release > 1000){
             release_timeout = true;
-            releasing = false;
-            released = true;
+            release = false;
             //set PWM 0 after servo released
             SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
-        }else{
-            // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1000);
+            if (motors->armed()) {
+                released = true;
+            }
         }
     }
-    }
+}
