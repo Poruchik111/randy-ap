@@ -356,7 +356,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                         GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE OFF");
                     }
                     if (!copter.p_safety_sw.timeout && copter.hw_safety_sw) {
-                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE SWITCH ON");
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE ON");
                     }
                 }else{
                     GCS_SEND_TEXT(MAV_SEVERITY_INFO,"MANUAL BLAST CHANNEL");
@@ -391,7 +391,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                         GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE OFF");
                     }
                     if (!copter.p_safety_sw.timeout && copter.hw_safety_sw) {
-                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE SWITCH ON");
+                        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"WAIT TIMER, SAFE ON");
                     }
                 }else{
                     GCS_SEND_TEXT(MAV_SEVERITY_INFO,"BOMB DROPPED");
