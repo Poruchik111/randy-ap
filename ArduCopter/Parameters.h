@@ -382,6 +382,7 @@ public:
         k_param_throw_altitude_min,
         k_param_throw_altitude_max,
         k_param_drone_type,
+        k_param_drop_pwm,
 
         // the k_param_* space is 9-bits in size
         // 511: reserved
@@ -459,7 +460,8 @@ public:
     AP_Int8         fs_crash_check;
     AP_Float        fs_ekf_thresh;
     AP_Int16        gcs_pid_mask;
-    AP_Int8         drone_type;
+    AP_Int8         drone_type;  //0=fpv kamik, 1= fpv bomber servo 
+    AP_Int32        drop_pwm;   // pwm to release bomb
 
 #if MODE_THROW_ENABLED == ENABLED
     AP_Enum<ModeThrow::PreThrowMotorState>         throw_motor_start;

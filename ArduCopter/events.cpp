@@ -504,13 +504,14 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 
 void Copter::goup()
 {
-    if ((!flightmode->in_guided_mode()) && !copter.failsafe.radio) {
+    if ((!flightmode->in_guided_mode()) || !copter.failsafe.radio) {
     return;
-}   
+    }   
+   
     if (!released){
         copter.release = true;
-        bomb_release(); // drope bomb if we are in RC Fail + RTL
-        gcs().send_text(MAV_SEVERITY_INFO, "BOMB DROPPED!");
+        bomb_release(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
     }
 
     if (baro_alt < 28000){
@@ -613,7 +614,7 @@ void Copter::bomb_release()
    
     if (releasing && !release_timeout){
                     // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1000);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);
        
         if (release_time - last_release > 1000){
             release_timeout = true;

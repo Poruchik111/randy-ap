@@ -307,8 +307,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef DRONE_TYPE_DEFAILT
-# define DRONE_TYPE_DEFAULT 0
+#ifndef FRAME_DRONE_TYPE_DEFAILT
+ # define FRAME_DRONE_TYPE_DEFAULT 0
+#endif
+
+#ifndef SERVO_SKYD_PWM_DEFAULT
+ # define SERVO_SKYD_PWM_DEFAULT      1500     // default release bomb pwm
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

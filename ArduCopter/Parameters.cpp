@@ -30,6 +30,22 @@
 #endif
 
 const AP_Param::Info Copter::var_info[] = {
+    
+    // @Param: FRAME_DRONE_TYPE
+    // @DisplayName: Drone Type
+    // @Description: Drone Type- kamikadze or Bomber
+    // @Values: 0:Kamikadze, 1:Bomber
+    // @User: Advanced
+    GSCALAR(drone_type, "FRAME_DRONE_TYPE" , FRAME_DRONE_TYPE_DEFAULT),
+
+    // @Param: SERVO_SKYD_PWM
+    // @DisplayName: Bomb Release PWM
+    // @Description: PWM value in microseconds sent to release the Bomb
+    // @Range: 1000 2000
+    // @Units: PWM
+    // @User: Standard
+    GSCALAR(drop_pwm, "SERVO_SKYD_PWM",  SERVO_SKYD_PWM_DEFAULT),
+
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format
@@ -438,13 +454,6 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Advanced
     GSCALAR(acro_trainer,   "ACRO_TRAINER",     (uint8_t)ModeAcro::Trainer::LIMITED),
 #endif
-
-    // @Param: DRONE_TYPE
-    // @DisplayName: Drone Type
-    // @Description: Drone Type- kamikadze or Bomber
-    // @Values: 0:Kamikadze,1:Bomber
-    // @User: Advanced
-    GSCALAR(drone_type, "DRONE_TYPE" ,  0),
     
     // variables not in the g class which contain EEPROM saved variables
 
