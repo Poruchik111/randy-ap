@@ -580,7 +580,6 @@ const uint32_t time_ms = AP_HAL::millis();
 
 }
 
-
 Rover rover;
 AP_Vehicle& vehicle = rover;
 

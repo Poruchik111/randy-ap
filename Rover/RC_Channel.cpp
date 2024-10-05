@@ -123,15 +123,16 @@ void RC_Channel_Rover::add_waypoint_for_current_loc()
 
 void RC_Channel_Rover::do_aux_function_sailboat_motor_3pos(const AuxSwitchPos ch_flag)
 {
-    switch (ch_flag) {
+     switch (ch_flag) {
     case AuxSwitchPos::HIGH:
-        rover.g2.sailboat.set_motor_state(Sailboat::UseMotor::USE_MOTOR_ALWAYS);
+        hal.gpio->write(80, 1);
         break;
     case AuxSwitchPos::MIDDLE:
-        rover.g2.sailboat.set_motor_state(Sailboat::UseMotor::USE_MOTOR_ASSIST);
+        rover.relay.on(4);
+        hal.gpio->write(80, 0);
         break;
     case AuxSwitchPos::LOW:
-        rover.g2.sailboat.set_motor_state(Sailboat::UseMotor::USE_MOTOR_NEVER);
+        rover.relay.off(4);
         break;
     }
 }
