@@ -433,6 +433,9 @@ void Rover::update_logging2(void)
 void Rover::one_second_loop(void)
 {
     set_control_channels();
+    reset_conveer();
+    set_conveer1();
+    set_conveer2();
 
     // cope with changes to aux functions
     SRV_Channels::enable_aux_servos();
@@ -508,6 +511,73 @@ bool Rover::get_wp_crosstrack_error_m(float &xtrack_error) const
     }
     xtrack_error = control_mode->crosstrack_error();
     return true;
+}
+
+void Rover::reset_conveer(void)
+{
+const uint32_t time_ms = AP_HAL::millis();
+  
+    if(conveer_pos0 && !conveer_move){
+        move_time = time_ms;       
+        conveer_move = true;
+        relay.off(2);
+        relay.on(3);
+        conveer_reset = false;
+    }
+        
+    if(conveer_pos0 && conveer_move && (time_ms > (move_time + 45000))){
+        relay.on(2);
+        relay.on(3);
+        conveer_reset = true;
+        conveer_set1 = false;
+        conveer_set2 = false;
+        conveer_move = false;
+        conveer_pos0 = false;
+        gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo Bay Reset Done");
+    }
+}
+
+void Rover::set_conveer1(void)
+{
+const uint32_t time_ms = AP_HAL::millis();
+   
+    if(conveer_pos1 && !conveer_move){
+        move_time = time_ms;
+        conveer_move = true;
+        relay.off(3);
+        relay.on(2);
+    }
+
+    if(conveer_pos1 && conveer_move && (time_ms > (move_time + 20000))){
+        relay.on(2);
+        relay.on(3);
+        conveer_set1 = true;
+        conveer_move = false;
+        conveer_pos1 = false;
+        gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo 1 Done");
+    }
+}
+
+void Rover::set_conveer2(void)
+{
+const uint32_t time_ms = AP_HAL::millis();
+
+    if(conveer_pos2 && !conveer_move){
+        move_time = time_ms;
+        conveer_move = true;
+        relay.off(3);
+        relay.on(2);
+    }
+
+    if(conveer_pos2 && conveer_move && (time_ms > (move_time + 20000))){
+        relay.on(2);
+        relay.on(3);
+        conveer_set2 = true;
+        conveer_move = false;
+        conveer_pos2 = false;
+        gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo 2 Done");
+    }
+
 }
 
 

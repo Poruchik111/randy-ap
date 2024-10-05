@@ -380,6 +380,17 @@ private:
 
     // Steering.cpp
     void set_servos(void);
+    void reset_conveer();
+    void set_conveer1();
+    void set_conveer2();
+    bool conveer_reset;
+    bool conveer_set1;
+    bool conveer_set2;
+    bool conveer_move;
+    bool conveer_pos0;
+    bool conveer_pos1;
+    bool conveer_pos2;
+    uint32_t move_time;
 
     // Rover.cpp
     void get_scheduler_tasks(const AP_Scheduler::Task *&tasks,

@@ -56,6 +56,12 @@ void RC_Channel_Rover::init_aux_function(const AUX_FUNC ch_option, const AuxSwit
     case AUX_FUNC::SAILBOAT_MOTOR_3POS:
         do_aux_function_sailboat_motor_3pos(ch_flag);
         break;
+    case AUX_FUNC::USER_FUNC1:
+        do_aux_function_periscope(ch_flag);
+        break;
+    case AUX_FUNC::USER_FUNC2:
+        do_aux_function_conveer(ch_flag);
+        break;
     default:
         RC_Channel::init_aux_function(ch_option, ch_flag);
         break;
@@ -126,6 +132,50 @@ void RC_Channel_Rover::do_aux_function_sailboat_motor_3pos(const AuxSwitchPos ch
         break;
     case AuxSwitchPos::LOW:
         rover.g2.sailboat.set_motor_state(Sailboat::UseMotor::USE_MOTOR_NEVER);
+        break;
+    }
+}
+
+void RC_Channel_Rover::do_aux_function_periscope(const AuxSwitchPos ch_flag)
+{
+    switch (ch_flag) {
+    case AuxSwitchPos::HIGH:
+        rover.relay.off(1);
+        break;
+    case AuxSwitchPos::MIDDLE:
+        rover.relay.on(0);
+        rover.relay.on(1);
+        break;
+    case AuxSwitchPos::LOW:
+        rover.relay.off(0);
+        break;
+    }
+}
+
+void RC_Channel_Rover::do_aux_function_conveer(const AuxSwitchPos ch_flag)
+{
+    switch (ch_flag) {
+    case AuxSwitchPos::HIGH:
+        if(!rover.conveer_move && rover.conveer_set1){
+            rover.conveer_pos2 = true;
+            gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo 2 start");
+            }
+        if(!rover.conveer_set1){
+            gcs().send_text(MAV_SEVERITY_NOTICE, "Error! Cargo 1 First!");
+        }
+        break;
+    case AuxSwitchPos::MIDDLE:
+        if(!rover.conveer_move && rover.conveer_reset){
+            rover.conveer_pos1 = true;
+            gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo 1 start");
+        }        
+        break;
+    case AuxSwitchPos::LOW:
+        if(!rover.conveer_move){
+            rover.conveer_pos0 = true;
+            rover.conveer_move = false;
+            gcs().send_text(MAV_SEVERITY_NOTICE, "Cargo Reset start");
+        }       
         break;
     }
 }
@@ -240,6 +290,14 @@ bool RC_Channel_Rover::do_aux_function(const AUX_FUNC ch_option, const AuxSwitch
     // sailboat motor state 3pos
     case AUX_FUNC::SAILBOAT_MOTOR_3POS:
         do_aux_function_sailboat_motor_3pos(ch_flag);
+        break;
+
+    case AUX_FUNC::USER_FUNC1:
+        do_aux_function_periscope(ch_flag);
+        break;
+
+    case AUX_FUNC::USER_FUNC2:
+        do_aux_function_conveer(ch_flag);
         break;
 
     // save steering trim
