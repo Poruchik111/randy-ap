@@ -443,6 +443,10 @@ private:
     uint32_t last_release;
     uint8_t released;
     uint8_t release;
+    uint64_t flth;
+    uint64_t flth1;
+    uint64_t flth2;
+    uint64_t flte;
 
     // Motor Output
     MOTOR_CLASS *motors;

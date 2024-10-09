@@ -478,7 +478,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
             break;
-        case FailsafeAction::SMARTRTL_LAND: //Training mode for all drones- land if on safety, compass rtl if not
+        case FailsafeAction::SMARTRTL_LAND: // land if on safety, compass rtl if not
             if (hw_safety_sw || !p_safety_sw.timeout){
             set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE); 
             }else{
@@ -526,30 +526,55 @@ void Copter::goup()
 
 void Copter::compass_rtl()
 {
-    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
+    if (!flightmode->in_guided_mode()) {
     return;
     }   
    
-    if (!released){
+    if (g.drone_type == 1 && !released){
         release = true;
         bomb_release(); 
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
     }
-
-    if (get_time_flying_ms() ){
-    if (baro_alt < g.rtl_altitude) {
-        set_angle_and_climbrate(0,-20,compass_mean_heading,6,false,0);
-        
-    if (baro_alt > g.rtl_altitude){
-        set_angle_and_climbrate(0,-20,compass_mean_heading,0,false,0);
+        //compass rtl when radio ok
+    if (!failsafe.radio) {
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);
     }
-    } 
-    }   
+        // Compass RTL when Radiofailsafe   
+    if (copter.failsafe.radio && !flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,6,true,45);
+    }else{
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);         
+    }
+    }
+
+    if (copter.failsafe.radio && flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,0,compass_mean_heading,6,true,45);
+    }else{
+        set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
+    }
+    }
+    
+    if (ahrs.home_is_set() && position_ok()) {
+        set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
+    }
 }
 
 void Copter::ignition_timer()
 {
    const uint32_t time_ms = AP_HAL::millis();
+
+    AP_Stats *stats = AP::stats();
+    uint32_t t = stats->get_flight_time_s();
+
+    if(copter.failsafe.radio) {
+        flth = t;
+    
+    }else{
+        flth1 = t-flth;
+        flth2 = t;
+    }
 
     // safety timer check/start
     if (p_safety_sw.active != motors->armed()) {
