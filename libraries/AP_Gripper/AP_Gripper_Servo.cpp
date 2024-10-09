@@ -89,6 +89,11 @@ bool AP_Gripper_Servo::released() const
     return (config.state == AP_Gripper::STATE_RELEASED);
 }
 
+bool AP_Gripper_Servo::grabbed() const
+{
+    return (config.state == AP_Gripper::STATE_GRABBED);
+}
+
 // type-specific periodic updates:
 void AP_Gripper_Servo::update_gripper()
 {

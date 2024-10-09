@@ -565,8 +565,8 @@ void Copter::ignition_timer()
 {
    const uint32_t time_ms = AP_HAL::millis();
 
-    AP_Stats *stats = AP::stats();
-    uint32_t t = stats->get_flight_time_s();
+    AP_Stats *statts = AP::stats();
+    uint32_t t = statts->get_flight_time_s();
 
     if(copter.failsafe.radio) {
         flth = t;
