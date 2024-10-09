@@ -473,7 +473,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE);
             break;
         case FailsafeAction::RTL:
-            if (hw_safety_sw){
+            if (hw_safety_sw || !p_safety_sw.timeout){
             set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE); 
             }else{
             set_mode_land_with_pause(reason);
@@ -504,21 +504,42 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 
 void Copter::goup()
 {
-    if ((!flightmode->in_guided_mode()) || !copter.failsafe.radio) {
+    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
     return;
     }   
    
     if (!released){
-        copter.release = true;
+        release = true;
         bomb_release(); 
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
     }
 
-    if (baro_alt < 28000){
+    if (baro_alt < g.rtl_altitude){
         set_angle_and_climbrate(0,0,0,8,false,0);
         
-    if (baro_alt > 30000){
+    if (baro_alt > g.rtl_altitude){
         set_angle_and_climbrate(0,0,0,0,false,0);
+    }
+    }    
+}
+
+void Copter::compass_rtl()
+{
+    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
+    return;
+    }   
+   
+    if (!released){
+        release = true;
+        bomb_release(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
+    }
+
+    if (baro_alt < g.rtl_altitude){
+        set_angle_and_climbrate(0,-20,compass_mean_heading,6,false,0);
+        
+    if (baro_alt > g.rtl_altitude){
+        set_angle_and_climbrate(0,-20,compass_mean_heading,0,false,0);
     }
     }    
 }
@@ -547,7 +568,7 @@ void Copter::ignition_timer()
         }
     } 
 
-    if(g.drone_type ==0){
+    if(g.drone_type == 0){
     // Self-destroyer timer 3 min
     if ((selfboom.active != failsafe.radio) && p_safety_sw.timeout){ 
             selfboom.active = failsafe.radio;  

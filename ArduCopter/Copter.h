@@ -737,6 +737,10 @@ private:
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
     bool set_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs);
+    void calc_mean_heading();
+    int16_t compass_total_count;
+    int16_t compass_total_heading;
+    int16_t compass_mean_heading;
 
     // Attitude.cpp
     void update_throttle_hover();
@@ -824,6 +828,7 @@ private:
     void bomb_release();
    // Guided non GPS mode in Land with pause to up to RTL ALT
     void goup();
+    void compass_rtl();
     // failsafe.cpp
     void failsafe_enable();
     void failsafe_disable();

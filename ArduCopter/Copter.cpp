@@ -244,6 +244,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 
     SCHED_TASK(goup,                100,     75, 153),
     SCHED_TASK(ignition,            400,     75, 156),
+    SCHED_TASK(compass_rtl,         100,     75, 160),
 
 #ifdef USERHOOK_SLOWLOOP
     SCHED_TASK(userhook_SlowLoop,      3.3,   75, 162),
@@ -646,6 +647,9 @@ void Copter::three_hz_loop()
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
     bomb_release();
+
+    // update assigned functions and enable auxiliary servos
+    SRV_Channels::enable_aux_servos();
 }
 
 // one_hz_loop - runs at 1Hz
@@ -670,9 +674,8 @@ void Copter::one_hz_loop()
     }
 
     ignition_timer();
+    calc_mean_heading();
     
-    // update assigned functions and enable auxiliary servos
-    SRV_Channels::enable_aux_servos();
 
 #if HAL_LOGGING_ENABLED
     // log terrain data
@@ -841,6 +844,49 @@ bool Copter::set_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_
 
     mode_guided.set_angle(q, Vector3f{}, climb_rate_ms*100, false);
     return true;
+}
+
+void Copter::calc_mean_heading() {
+
+    AP_Stats *statss = AP::stats();
+    uint32_t flt = statss ->get_flight_time_s();
+    int32_t pitch = ahrs.pitch_sensor /100;
+    int32_t yaw = ahrs.yaw_sensor /100;
+    bool heading_rel = false;
+
+    // start calculating RTL after 1 min of flying, stop calc after 2 min of calc
+    if (flt < 60 || flt > 180) {
+        return;
+    }
+    
+    if (!motors -> armed()){
+        compass_total_count = 0;
+        compass_total_heading = 0;
+        compass_mean_heading = yaw;
+    }
+
+    // check N/S flight course to prevent over 360 deg calc
+    if (yaw < 90 || yaw > 270){
+    heading_rel = true;
+    }
+
+    if (heading_rel){
+        yaw += 180;
+        if (yaw > 360) {
+            yaw -=360;
+        }
+    }
+    //count when fly forward only
+    if (pitch < -4){
+        compass_total_count ++;
+        compass_total_heading += yaw;
+        gcs().send_text(MAV_SEVERITY_INFO, "RTL counting");
+    }
+
+    if (compass_total_count > 0) {
+        compass_mean_heading = compass_total_heading / compass_total_count;
+        gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
+    }
 }
 
 /*
