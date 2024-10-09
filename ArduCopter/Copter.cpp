@@ -885,6 +885,11 @@ void Copter::calc_mean_heading() {
 
     if (compass_total_count > 0) {
         compass_mean_heading = compass_total_heading / compass_total_count;
+        compass_mean_heading += 180; // rtl course
+        
+        if (compass_mean_heading > 360){
+            compass_mean_heading -= 360;
+        }
         gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
     }
 }

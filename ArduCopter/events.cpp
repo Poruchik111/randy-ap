@@ -470,22 +470,23 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
         case FailsafeAction::NONE:
             return;
         case FailsafeAction::LAND:
-            set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE);
+            set_mode_land_with_pause(reason); //go up to rtl alt
             break;
         case FailsafeAction::RTL:
-            if (hw_safety_sw || !p_safety_sw.timeout){
-            set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE); 
-            }else{
-            set_mode_land_with_pause(reason);
-            }
+            set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE); //compass rtl if no gps
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
             break;
-        case FailsafeAction::SMARTRTL_LAND:
-            set_mode_SmartRTL_or_land_with_pause(reason);
+        case FailsafeAction::SMARTRTL_LAND: //Training mode for all drones- land if on safety, compass rtl if not
+            if (hw_safety_sw || !p_safety_sw.timeout){
+            set_mode(Mode::Number::LAND, ModeReason::RADIO_FAILSAFE); 
+            }else{
+            set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE); 
+            }
             break;
         case FailsafeAction::TERMINATE: {
+
 #if ADVANCED_FAILSAFE == ENABLED
             g2.afs.gcs_terminate(true, "Failsafe");
 #else
@@ -535,13 +536,15 @@ void Copter::compass_rtl()
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
     }
 
-    if (baro_alt < g.rtl_altitude){
+    if (get_time_flying_ms() ){
+    if (baro_alt < g.rtl_altitude) {
         set_angle_and_climbrate(0,-20,compass_mean_heading,6,false,0);
         
     if (baro_alt > g.rtl_altitude){
         set_angle_and_climbrate(0,-20,compass_mean_heading,0,false,0);
     }
-    }    
+    } 
+    }   
 }
 
 void Copter::ignition_timer()
