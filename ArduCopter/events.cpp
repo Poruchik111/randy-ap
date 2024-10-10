@@ -568,12 +568,17 @@ void Copter::ignition_timer()
     AP_Stats *statts = AP::stats();
     uint32_t t = statts->get_flight_time_s();
 
-    if(copter.failsafe.radio) {
-        flth = t;
-    
+   if(!copter.failsafe.radio) {
+        flth = flt - fltrc; //last flight time in RC
+        fltnorc = flt; // time when RC fail
+        flte = false;
     }else{
-        flth1 = t-flth;
-        flth2 = t;
+        fltfs = flt - fltnorc; //time we flying in Compass RTL
+        fltrc = flt;// time when RC ok
+        
+        if (fltfs > (flth * 0.1 * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 1.0f, 0.0f, UINT32_MAX))))) {
+            flte = true;
+        }
     }
 
     // safety timer check/start

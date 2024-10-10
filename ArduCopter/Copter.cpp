@@ -858,6 +858,10 @@ void Copter::calc_mean_heading() {
     if (flt < 60 || flt > 180) {
         return;
     }
+    // send calculated rtl course
+    if ( flt >= 179) {
+        gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
+    }
     
     if (!motors -> armed()){
         compass_total_count = 0;
@@ -880,7 +884,6 @@ void Copter::calc_mean_heading() {
     if (pitch < -4){
         compass_total_count ++;
         compass_total_heading += yaw;
-        gcs().send_text(MAV_SEVERITY_INFO, "RTL counting");
     }
 
     if (compass_total_count > 0) {
@@ -890,7 +893,6 @@ void Copter::calc_mean_heading() {
         if (compass_mean_heading > 360){
             compass_mean_heading -= 360;
         }
-        gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
     }
 }
 
