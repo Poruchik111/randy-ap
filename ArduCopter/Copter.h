@@ -443,7 +443,6 @@ private:
     uint32_t last_release;
     uint8_t released;
     uint8_t release;
-    uint64_t flt;
     uint64_t flth;
     uint64_t fltrc;
     uint64_t fltnorc;\
