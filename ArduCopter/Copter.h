@@ -445,7 +445,7 @@ private:
     uint8_t release;
     uint64_t flth;
     uint64_t fltrc;
-    uint64_t fltnorc;\
+    uint64_t fltnorc;
     uint64_t fltfs;
     bool flte;
 
