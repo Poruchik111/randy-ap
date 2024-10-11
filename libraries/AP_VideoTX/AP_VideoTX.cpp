@@ -79,7 +79,7 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
     // @DisplayName: Video Transmitter Band
     // @Description: Video Transmitter Band
     // @User: Standard
-    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band L,6:Band U,7:Band O,8:Band X,19:1G3 Band A,10:1G3 Band B
     AP_GROUPINFO("BAND2",  8, AP_VideoTX, _band, 3),
 
     AP_GROUPEND
@@ -94,7 +94,7 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
 
 extern const AP_HAL::HAL& hal;
 
-const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","H","L","U","O","X","1G3_A","1G3_B"};
+const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","L","U","O","X","1G3_A","1G3_B"};
 
 const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNELS] =
 {
@@ -102,8 +102,8 @@ const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNEL
     { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, /* Band B */
     { 5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945}, /* Band E */
     { 5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, /* Band F */
-    { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, /* Band R */
-    { 5333, 5373, 5413, 5453, 5493, 5533, 5573, 5613}, /* Band L */
+    { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, /* Race */
+    { 5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621}, /* LO Race */
     { 5325, 5348, 5366, 5384, 5402, 5420, 5438, 5456}, /* Band U */
     { 5474, 5492, 5510, 5528, 5546, 5564, 5582, 5600}, /* Band O */
     { 4990, 5020, 5050, 5080, 5110, 5140, 5170, 5200}, /* Band X */

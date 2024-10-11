@@ -61,7 +61,6 @@ public:
         BAND_E,
         BAND_F,
         BAND_R,
-        BAND_H,
         BAND_L,
         BAND_U,
         BAND_O,

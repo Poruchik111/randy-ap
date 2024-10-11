@@ -530,7 +530,7 @@ void Copter::compass_rtl()
     return;
     }   
    
-    if (g.drone_type == 1 && !released){
+    if (!hw_safety_sw && p_safety_sw.timeout && !released){
         release = true;
         bomb_release(); 
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");

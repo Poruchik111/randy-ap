@@ -855,11 +855,11 @@ void Copter::calc_mean_heading() {
     bool heading_rel = false;
 
     // start calculating RTL after 1 min of flying, stop calc after 2 min of calc
-    if (flt < 60 || flt > 180) {
+    if (flt < 60 || flt > 120) {
         return;
     }
     // send calculated rtl course
-    if ( flt >= 179) {
+    if ( flt >= 119) {
         gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
     }
     

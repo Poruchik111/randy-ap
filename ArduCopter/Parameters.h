@@ -460,8 +460,8 @@ public:
     AP_Int8         fs_crash_check;
     AP_Float        fs_ekf_thresh;
     AP_Int16        gcs_pid_mask;
-    AP_Int8         drone_type;  //0=fpv kamik, 1= fpv bomber servo 
-    AP_Int32        drop_pwm;   // pwm to release bomb
+    AP_Int8         drone_type;     //0=fpv kamik, 1= fpv bomber servo 
+    AP_Int32        drop_pwm;       // pwm to release bomb
 
 #if MODE_THROW_ENABLED == ENABLED
     AP_Enum<ModeThrow::PreThrowMotorState>         throw_motor_start;
