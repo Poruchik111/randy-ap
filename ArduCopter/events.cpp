@@ -524,39 +524,6 @@ void Copter::goup()
     }    
 }
 
-void Copter::compass_rtl()
-{
-    if (!flightmode->in_guided_mode()) {
-    return;
-    }   
-   
-    if (!hw_safety_sw && p_safety_sw.timeout && !released){
-        release = true;
-        bomb_release(); 
-        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
-    }
-        //compass rtl when radio ok
-    if (!failsafe.radio) {
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);
-    }
-        // Compass RTL when Radiofailsafe   
-    if (copter.failsafe.radio && !flte) {
-    if (baro_alt <= g.rtl_altitude){
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,6,true,45);
-    }else{
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);         
-    }
-    }
-
-    if (copter.failsafe.radio && flte) {
-    if (baro_alt <= g.rtl_altitude){
-        set_target_angle_and_climbrate(0,0,compass_mean_heading,6,true,45);
-    }else{
-        set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
-    }
-    }
-}
-
 void Copter::ignition_timer()
 {
    const uint32_t time_ms = AP_HAL::millis();

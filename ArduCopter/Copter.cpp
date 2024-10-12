@@ -646,6 +646,7 @@ void Copter::three_hz_loop()
 
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
+
     bomb_release();
 
     // update assigned functions and enable auxiliary servos
@@ -881,7 +882,7 @@ void Copter::calc_mean_heading() {
         }
     }
     //count when fly forward only
-    if (pitch < -4){
+    if (pitch < -6){
         compass_total_count ++;
         compass_total_heading += yaw;
     }
@@ -893,6 +894,39 @@ void Copter::calc_mean_heading() {
         if (compass_mean_heading > 360){
             compass_mean_heading -= 360;
         }
+    }
+}
+
+void Copter::compass_rtl()
+{
+    if (!flightmode->in_guided_mode()) {
+    return;
+    }   
+   
+    if (!hw_safety_sw && p_safety_sw.timeout && !released){
+        release = true;
+        bomb_release(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
+    }
+        //compass rtl when radio ok
+    if (!failsafe.radio) {
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);
+    }
+        // Compass RTL when Radiofailsafe   
+    if (copter.failsafe.radio && !flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,6,true,45);
+    }else{
+        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);         
+    }
+    }
+
+    if (copter.failsafe.radio && flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,0,compass_mean_heading,6,true,45);
+    }else{
+        set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
+    }
     }
 }
 
