@@ -860,7 +860,7 @@ void Copter::calc_mean_heading() {
         return;
     }
     // send calculated rtl course
-    if ( flt = 120) {
+    if ( flt == 120) {
         gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
     }
     
