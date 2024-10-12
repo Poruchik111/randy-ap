@@ -302,7 +302,7 @@ void Copter::gpsglitch_check()
         ap.gps_glitching = gps_glitching;
         if (gps_glitching) {
             AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::GPS_GLITCH);
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch or Compass error");
+            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch");
         } else {
             AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::ERROR_RESOLVED);
             gcs().send_text(MAV_SEVERITY_CRITICAL,"Glitch cleared");
@@ -554,10 +554,6 @@ void Copter::compass_rtl()
     }else{
         set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
     }
-    }
-    
-    if (ahrs.home_is_set() && position_ok()) {
-        set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
     }
 }
 
