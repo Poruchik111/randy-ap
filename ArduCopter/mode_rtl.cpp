@@ -17,7 +17,7 @@ bool ModeRTL::init(bool ignore_checks)
             set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
             gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
             copter.compass_rtl();
-            return false;
+            return true;
         }
     }
     // initialise waypoint and spline controller
