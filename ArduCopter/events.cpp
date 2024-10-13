@@ -503,27 +503,6 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
     }
 }
 
-void Copter::goup()
-{
-    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
-    return;
-    }   
-   
-    if (!released){
-        release = true;
-        bomb_release(); 
-        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
-    }
-
-    if (baro_alt < g.rtl_altitude){
-        set_angle_and_climbrate(0,0,0,8,false,0);
-        
-    if (baro_alt > g.rtl_altitude){
-        set_angle_and_climbrate(0,0,0,0,false,0);
-    }
-    }    
-}
-
 void Copter::ignition_timer()
 {
    const uint32_t time_ms = AP_HAL::millis();

@@ -284,7 +284,7 @@ bool Copter::set_target_location(const Location& target_loc)
 #endif //MODE_GUIDED_ENABLED == ENABLED
 #endif //AP_SCRIPTING_ENABLED || AP_EXTERNAL_CONTROL_ENABLED
 
-#if AP_SCRIPTING_ENABLED
+//#if AP_SCRIPTING_ENABLED
 #if MODE_GUIDED_ENABLED == ENABLED
 // start takeoff to given altitude (for use by scripting)
 bool Copter::start_takeoff(float alt)
@@ -456,7 +456,7 @@ bool Copter::update_target_location(const Location &old_loc, const Location &new
     return set_target_location(new_loc);
 }
 
-#endif // AP_SCRIPTING_ENABLED
+//#endif // AP_SCRIPTING_ENABLED
 
 // returns true if vehicle is landing. Only used by Lua scripts
 bool Copter::is_landing() const
@@ -833,7 +833,7 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
     return true;
 }
 
-bool Copter::set_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
+bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -928,6 +928,27 @@ void Copter::compass_rtl()
         set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
     }
     }
+}
+
+void Copter::goup()
+{
+    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
+    return;
+    }   
+   
+    if (!released){
+        release = true;
+        bomb_release(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
+    }
+
+    if (baro_alt < g.rtl_altitude){
+        set_target_angle_and_climbrate(0,0,0,8,false,0);
+        
+    if (baro_alt > g.rtl_altitude){
+        set_target_angle_and_climbrate(0,0,0,0,false,0);
+    }
+    }    
 }
 
 /*
