@@ -125,14 +125,14 @@ void RC_Channel_Rover::do_aux_function_sailboat_motor_3pos(const AuxSwitchPos ch
 {
      switch (ch_flag) {
     case AuxSwitchPos::HIGH:
-        hal.gpio->write(80, 1);
+       rover.relay.off(4);
         break;
     case AuxSwitchPos::MIDDLE:
         rover.relay.on(4);
-        hal.gpio->write(80, 0);
+        rover.relay.on(5);
         break;
     case AuxSwitchPos::LOW:
-        rover.relay.off(4);
+        rover.relay.off(5);
         break;
     }
 }
