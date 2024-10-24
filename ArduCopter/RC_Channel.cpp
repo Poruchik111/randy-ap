@@ -686,9 +686,8 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
 
         case AUX_FUNC::SIMPLE_HEADING_RESET:
             if (ch_flag == AuxSwitchPos::HIGH) {
-                copter.init_simple_bearing();
-                gcs().send_text(MAV_SEVERITY_INFO, "Simple heading reset");
-            }
+                copter.calc_mean_heading();
+            }   
             break;
 
         case AUX_FUNC::ARMDISARM_AIRMODE:

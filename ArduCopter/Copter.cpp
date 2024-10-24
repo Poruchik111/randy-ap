@@ -675,7 +675,7 @@ void Copter::one_hz_loop()
     }
 
     ignition_timer();
-    calc_mean_heading();
+   // calc_mean_heading();
     
 
 #if HAL_LOGGING_ENABLED
@@ -849,14 +849,17 @@ bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, flo
 
 void Copter::calc_mean_heading() {
 
-    if(compass_rtl_course ){
-        compass_rtl_course = compass_mean_heading += 180; // rtl course
-    }else{
-        compass_rtl_course = compass_mean_heading -= 180;
+   // if we are in Compass RTL we can't change home course.
+    if(flightmode->in_guided_mode()) {
+        return;
+
+
+    compass_rtl_course = (ahrs.yaw_sensor / 100) + 180;
+    if (compass_rtl_course >= 360) {
+        compass_rtl_course -= 360;
     }
-    
-    gcs().send_text(MAV_SEVERITY_INFO, "%d home", compass_rtl_course);
-    
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "%i Deg RTL Course", compass_rtl_course);
+    }
 }
 
 void Copter::compass_rtl()
