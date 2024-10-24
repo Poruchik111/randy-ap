@@ -849,54 +849,14 @@ bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, flo
 
 void Copter::calc_mean_heading() {
 
-    AP_Stats *statss = AP::stats();
-    uint32_t flt = statss ->get_flight_time_s();
-    int32_t pitch = ahrs.pitch_sensor /100;
-    int32_t yaw = ahrs.yaw_sensor /100;
-    bool heading_rel = false;
-
-    // start calculating RTL after 1 min of flying, stop calc after 2 min of calc
-    if (flt < 60 || flt > 120) {
-        return;
-    }
-    // send calculated rtl course
-    if ( flt >= 119) {
-        gcs().send_text(MAV_SEVERITY_INFO, "%d RTL deg", compass_mean_heading);
+    if(compass_rtl_course ){
+        compass_rtl_course = compass_mean_heading += 180; // rtl course
+    }else{
+        compass_rtl_course = compass_mean_heading -= 180;
     }
     
-    if (!motors -> armed()){
-        compass_total_count = 0;
-        compass_total_heading = 0;
-        compass_mean_heading = yaw;
-    }
-
-    // check N/S flight course to prevent over 360 deg calc
-    if (yaw < 90 || yaw > 270){
-    heading_rel = true;
-    }
-
-    if (heading_rel){
-        yaw += 180;
-        if (yaw > 360) {
-            yaw -=360;
-        }
-    }
-    //count when fly forward only
-    if (pitch < -6){
-        compass_total_count ++;
-        compass_total_heading += yaw;
-    }
-
-    if (compass_total_count > 0) {
-        compass_mean_heading = compass_total_heading / compass_total_count;
-    }   
-        
-    if(!heading_rel){
-        compass_mean_heading += 180; // rtl course
-        if (compass_mean_heading > 360){
-            compass_mean_heading -= 360;
-        }
-    }    
+    gcs().send_text(MAV_SEVERITY_INFO, "%d home", compass_rtl_course);
+    
 }
 
 void Copter::compass_rtl()
@@ -912,22 +872,22 @@ void Copter::compass_rtl()
     }
         //compass rtl when radio ok
     if (!failsafe.radio) {
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);
+        set_target_angle_and_climbrate(0,-20,compass_rtl_course,0,true,45);
     }
         // Compass RTL when Radiofailsafe   
     if (copter.failsafe.radio && !flte) {
     if (baro_alt <= g.rtl_altitude){
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,6,true,45);
+        set_target_angle_and_climbrate(0,-20,compass_rtl_course,6,true,45);
     }else{
-        set_target_angle_and_climbrate(0,-20,compass_mean_heading,0,true,45);         
+        set_target_angle_and_climbrate(0,-20,compass_rtl_course,0,true,45);         
     }
     }
 
     if (copter.failsafe.radio && flte) {
     if (baro_alt <= g.rtl_altitude){
-        set_target_angle_and_climbrate(0,0,compass_mean_heading,6,true,45);
+        set_target_angle_and_climbrate(0,0,compass_rtl_course,6,true,45);
     }else{
-        set_target_angle_and_climbrate(0,0,compass_mean_heading,0,true,45);         
+        set_target_angle_and_climbrate(0,0,compass_rtl_course,0,true,45);         
     }
     }
 }
@@ -938,19 +898,11 @@ void Copter::goup()
     return;
     }   
    
-    if (!released){
-        release = true;
-        bomb_release(); 
-        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
-    }
-
     if (baro_alt < g.rtl_altitude){
         set_target_angle_and_climbrate(0,0,0,8,false,0);
-        
-    if (baro_alt > g.rtl_altitude){
+        }else{
         set_target_angle_and_climbrate(0,0,0,0,false,0);
-    }
-    }    
+    }   
 }
 
 /*

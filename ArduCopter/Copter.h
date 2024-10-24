@@ -744,9 +744,10 @@ private:
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
     void calc_mean_heading();
-    int16_t compass_total_count;
-    int16_t compass_total_heading;
-    int16_t compass_mean_heading;
+    //uint32_t compass_total_count;
+    //uint32_t compass_total_heading;
+    //uint32_t compass_mean_heading;
+    int16_t compass_rtl_course;
 
     // Attitude.cpp
     void update_throttle_hover();
