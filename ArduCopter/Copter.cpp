@@ -849,17 +849,11 @@ bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, flo
 
 void Copter::calc_mean_heading() {
 
-   // if we are in Compass RTL we can't change home course.
-    if(flightmode->in_guided_mode()) {
-        return;
-
-
     compass_rtl_course = (ahrs.yaw_sensor / 100) + 180;
     if (compass_rtl_course >= 360) {
         compass_rtl_course -= 360;
     }
     gcs().send_text(MAV_SEVERITY_CRITICAL, "%i Deg RTL Course", compass_rtl_course);
-    }
 }
 
 void Copter::compass_rtl()
