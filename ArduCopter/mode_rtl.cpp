@@ -9,9 +9,19 @@
  * and the lower implementation of the waypoint or landing controllers within those states
  */
 
+
 // rtl_init - initialise rtl controller
 bool ModeRTL::init(bool ignore_checks)
 {
+
+    if (!AP::ahrs().home_is_set() || !copter.position_ok()) {
+        set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
+        gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
+        copter.crtl = true;
+        copter.compass_rtl();
+        return false;
+    }
+   
     // initialise waypoint and spline controller
     wp_nav->wp_and_spline_init(g.rtl_speed_cms);
     _state = SubMode::STARTING;
@@ -59,14 +69,6 @@ ModeRTL::RTLAltType ModeRTL::get_alt_type() const
 void ModeRTL::run(bool disarm_on_land)
 {
     if (!motors->armed()) {
-        return;
-    }
-
-    if (!AP::ahrs().home_is_set() || !copter.position_ok()) {
-        set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
-        gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
-        copter.crtl = true;
-        copter.compass_rtl();
         return;
     }
     
