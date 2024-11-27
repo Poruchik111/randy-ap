@@ -858,6 +858,10 @@ void Copter::calc_mean_heading() {
 
 void Copter::compass_rtl()
 {
+    if (g.drone_type != 1) {
+        return;
+    }
+
     if (!flightmode->in_guided_mode()) {
     return;
     }   
@@ -891,6 +895,10 @@ void Copter::compass_rtl()
 
 void Copter::goup()
 {
+    if (g.drone_type != 0) {
+        return;
+    }
+
     if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
     return;
     }   

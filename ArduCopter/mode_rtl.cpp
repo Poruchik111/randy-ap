@@ -14,9 +14,14 @@ bool ModeRTL::init(bool ignore_checks)
 {
     if (!ignore_checks) {
         if (!AP::ahrs().home_is_set()) {
-            return true;
+            set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
+            gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
+           
         }
+        
+        return true;
     }
+
     // initialise waypoint and spline controller
     wp_nav->wp_and_spline_init(g.rtl_speed_cms);
     _state = SubMode::STARTING;
@@ -64,13 +69,6 @@ ModeRTL::RTLAltType ModeRTL::get_alt_type() const
 void ModeRTL::run(bool disarm_on_land)
 {
     if (!motors->armed()) {
-        return;
-    }
-
-    if (!AP::ahrs().home_is_set()) {
-        set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
-        gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
-        copter.compass_rtl();
         return;
     }
 
