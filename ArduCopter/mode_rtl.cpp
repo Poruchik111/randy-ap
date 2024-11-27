@@ -21,7 +21,6 @@ bool ModeRTL::init(bool ignore_checks)
         gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
         copter.crtl = true;
         copter.compass_rtl();
-        return;
     }
 
     // initialise waypoint and spline controller
