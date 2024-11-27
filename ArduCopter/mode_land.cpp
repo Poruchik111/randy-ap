@@ -155,7 +155,8 @@ void Copter::set_mode_land_with_pause(ModeReason reason)
 {
     set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
     gcs().send_text(MAV_SEVERITY_INFO, "NO RC. GoUp");
-    goup();
+    copter.goupinit = true;
+    copter.goup();
 
 }
 

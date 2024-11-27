@@ -626,14 +626,16 @@ void Copter::bomb_release()
 
 void Copter::compass_rtl()
 {
-    if (g.drone_type != 1) {
+
+    if (!flightmode->in_guided_mode()) {
+        crtl = false;    
+        return;
+    }   
+        //exit if Compass RTL not called
+    if (!crtl){
         return;
     }
 
-    if (!flightmode->in_guided_mode()) {
-    return;
-    }   
-   
     if (!hw_safety_sw && p_safety_sw.timeout && !released){
         release = true;
         bomb_release(); 
@@ -663,16 +665,17 @@ void Copter::compass_rtl()
 
 void Copter::goup()
 {
-    if (g.drone_type != 0) {
-        return;
+    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
+        goupinit = false;
+    return;
     }
 
-    if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
-    return;
-    }   
+    if (!goupinit) {
+        return;
+    }
    
     if (baro_alt < g.rtl_altitude){
-        set_target_angle_and_climbrate(0,0,0,8,false,0);
+        set_target_angle_and_climbrate(0,0,0,6,false,0);
         }else{
         set_target_angle_and_climbrate(0,0,0,0,false,0);
     }   

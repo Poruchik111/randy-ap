@@ -448,6 +448,8 @@ private:
     uint64_t fltnorc;
     uint64_t fltfs;
     bool flte;
+    bool crtl;      //compass RTL called from RTL Mode;
+    bool goupinit;      // Goup control called from Land mode;
 
     // Motor Output
     MOTOR_CLASS *motors;
