@@ -644,7 +644,6 @@ void Copter::compass_rtl()
         //compass rtl when radio ok
     if (!failsafe.radio) {
         set_target_angle_and_climb(0,-20,compass_rtl_course,0,true,45);
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "fly home -20");
     }
         // Compass RTL when Radiofailsafe   
     if (copter.failsafe.radio && !flte) {
