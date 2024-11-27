@@ -12,17 +12,6 @@
 // rtl_init - initialise rtl controller
 bool ModeRTL::init(bool ignore_checks)
 {
-    if (!ignore_checks) {
-        return true;
-    }
-
-    if (!AP::ahrs().home_is_set() || !copter.position_ok()) {
-        set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
-        gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
-        copter.crtl = true;
-        copter.compass_rtl();
-    }
-
     // initialise waypoint and spline controller
     wp_nav->wp_and_spline_init(g.rtl_speed_cms);
     _state = SubMode::STARTING;
@@ -73,6 +62,14 @@ void ModeRTL::run(bool disarm_on_land)
         return;
     }
 
+    if (!AP::ahrs().home_is_set() || !copter.position_ok()) {
+        set_mode(Mode::Number::GUIDED_NOGPS, ModeReason::RADIO_FAILSAFE);
+        gcs().send_text(MAV_SEVERITY_INFO, "Compass RTL");
+        copter.crtl = true;
+        copter.compass_rtl();
+        return;
+    }
+    
     // check if we need to move to next state
     if (_state_complete) {
         switch (_state) {
