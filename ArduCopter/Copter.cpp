@@ -284,7 +284,7 @@ bool Copter::set_target_location(const Location& target_loc)
 #endif //MODE_GUIDED_ENABLED == ENABLED
 #endif //AP_SCRIPTING_ENABLED || AP_EXTERNAL_CONTROL_ENABLED
 
-//#if AP_SCRIPTING_ENABLED
+#if AP_SCRIPTING_ENABLED
 #if MODE_GUIDED_ENABLED == ENABLED
 // start takeoff to given altitude (for use by scripting)
 bool Copter::start_takeoff(float alt)
@@ -372,6 +372,19 @@ bool Copter::set_target_velaccel_NED(const Vector3f& target_vel, const Vector3f&
     return true;
 }
 
+bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
+{
+    // exit if vehicle is not in Guided mode or Auto-Guided mode
+    if (!flightmode->in_guided_mode()) {
+        return false;
+    }
+
+    Quaternion q;
+    q.from_euler(radians(roll_deg),radians(pitch_deg),radians(yaw_deg));
+
+    mode_guided.set_angle(q, Vector3f{}, climb_rate_ms*100, false);
+    return true;
+}
 
 #endif
 
@@ -456,7 +469,7 @@ bool Copter::update_target_location(const Location &old_loc, const Location &new
     return set_target_location(new_loc);
 }
 
-//#endif // AP_SCRIPTING_ENABLED
+#endif // AP_SCRIPTING_ENABLED
 
 // returns true if vehicle is landing. Only used by Lua scripts
 bool Copter::is_landing() const
@@ -833,7 +846,7 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
     return true;
 }
 
-bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
+bool Copter::set_target_angle_and_climb(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {

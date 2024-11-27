@@ -698,7 +698,7 @@ private:
 #endif // MODE_GUIDED_ENABLED == ENABLED
 #endif // AP_SCRIPTING_ENABLED || AP_EXTERNAL_CONTROL_ENABLED
 
-//#if AP_SCRIPTING_ENABLED
+#if AP_SCRIPTING_ENABLED
 #if MODE_GUIDED_ENABLED == ENABLED
     bool start_takeoff(float alt) override;
     bool get_target_location(Location& target_loc) override;
@@ -725,7 +725,7 @@ private:
     // lua scripts use this to retrieve EKF failsafe state
     // returns true if the EKF failsafe has triggered
     bool has_ekf_failsafed() const override;
-//#endif // AP_SCRIPTING_ENABLED
+#endif // AP_SCRIPTING_ENABLED
     bool is_landing() const override;
     bool is_taking_off() const override;
     void rc_loop();
@@ -745,6 +745,7 @@ private:
     bool get_wp_bearing_deg(float &bearing) const override;
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
+    bool set_target_angle_and_climb(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs);
     void calc_mean_heading();
     //uint32_t compass_total_count;
     //uint32_t compass_total_heading;
