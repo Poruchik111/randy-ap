@@ -724,16 +724,7 @@ private:
     void rotate_body_frame_to_NE(float &x, float &y);
     uint16_t get_pilot_speed_dn() const;
     void run_rate_controller();
-    void set_rtl_deg();
-    uint16_t rtl_deg;
-    void compass_rtl_run();
-    uint32_t flt;
-    uint32_t flth;
-    uint32_t flte;
-    uint32_t fltrc;
-    uint32_t fltnorc;
-    uint32_t fltfs;
-
+    
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
     void run_custom_controller() { custom_control.update(); }
 #endif
@@ -806,7 +797,17 @@ private:
     bool should_disarm_on_failsafe();
     void do_failsafe_action(FailsafeAction action, ModeReason reason);
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);
-
+    void set_rtl_deg();
+    void crtl_timer();
+    void compass_rtl_run();
+    uint16_t rtl_deg;
+    uint32_t flt;
+    uint32_t flth;
+    uint32_t flte;
+    uint32_t fltrc;
+    uint32_t fltnorc;
+    uint32_t fltfs;
+    
     // failsafe.cpp
     void failsafe_enable();
     void failsafe_disable();

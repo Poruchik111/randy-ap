@@ -514,8 +514,8 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 #endif
 }
 
-// No GPS compass RTL func
-void Copter::compass_rtl_run() {
+
+void Copter::crtl_timer() {
 
     AP_Stats *statts = AP::stats();
     flt = statts->get_flight_time_s();
@@ -534,6 +534,10 @@ void Copter::compass_rtl_run() {
     if (!flightmode->in_guided_mode()) {
     return;
     }
+}
+
+// No GPS compass RTL func
+void Copter::compass_rtl_run() {
 
     if (!copter.failsafe.radio) {
         set_target_angle_and_climbrate(0,-14,rtl_deg,0,true,20);

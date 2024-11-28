@@ -241,9 +241,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if AP_WINCH_ENABLED
     SCHED_TASK_CLASS(AP_Winch,             &copter.g2.winch,            update,          50,  50, 150),
 #endif
-#ifdef USERHOOK_FASTLOOP
-    SCHED_TASK(userhook_FastLoop,    100,     75, 153),
-#endif
+
+    SCHED_TASK(compass_rtl_run,      100,     100, 153),
+
 #ifdef USERHOOK_50HZLOOP
     SCHED_TASK(userhook_50Hz,         50,     75, 156),
 #endif
@@ -693,6 +693,8 @@ void Copter::one_hz_loop()
 #if HAL_LOGGING_ENABLED
     // log terrain data
     terrain_logging();
+    // compass RTL timer
+    crtl_timer();
 #endif
 
 #if HAL_ADSB_ENABLED
