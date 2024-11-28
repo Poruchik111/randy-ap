@@ -25,7 +25,7 @@ bool ModeRTL::init(bool ignore_checks)
     // initialise waypoint and spline controller
     wp_nav->wp_and_spline_init(g.rtl_speed_cms);
     _state = SubMode::STARTING;
-    _state_complete = true; // see run() method below
+    _state_complete = true; // see run() method below+++++++-
     terrain_following_allowed = !copter.failsafe.terrain;
     // reset flag indicating if pilot has applied roll or pitch inputs during landing
     copter.ap.land_repo_active = false;
