@@ -318,6 +318,12 @@ void Copter::gpsglitch_check()
 // dead reckoning alert and failsafe
 void Copter::failsafe_deadreckon_check()
 {
+       // exit immediately if deadreckon failsafe is disabled
+    if (g2.failsafe_dr_enable <= 0) {
+        failsafe.deadreckon = false;
+        return;
+    }
+
     // update dead reckoning state
     const char* dr_prefix_str = "Dead Reckoning";
 
@@ -345,12 +351,6 @@ void Copter::failsafe_deadreckon_check()
             dead_reckoning.timeout = true;
             gcs().send_text(MAV_SEVERITY_CRITICAL,"%s timeout", dr_prefix_str);
         }
-    }
-
-    // exit immediately if deadreckon failsafe is disabled
-    if (g2.failsafe_dr_enable <= 0) {
-        failsafe.deadreckon = false;
-        return;
     }
 
     // check for failsafe action
@@ -514,3 +514,48 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 #endif
 }
 
+// No GPS compass RTL func
+void Copter::compass_rtl_run() {
+
+    AP_Stats *statts = AP::stats();
+    flt = statts->get_flight_time_s();
+   
+    if(!copter.failsafe.radio) {
+        flth = flt - fltrc; //last flight time in RC
+        fltnorc = flt; // time when RC fail
+        flte = false;
+    }else{
+        fltfs = flt - fltnorc; //time we flying in Compass RTL
+        fltrc = flt;// time when RC ok
+        if (fltfs > (flth * 0.1 * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 1.0f, 0.0f, UINT32_MAX))))) {
+        flte = true;
+        }
+    }
+    if (!flightmode->in_guided_mode()) {
+    return;
+    }
+
+    if (!copter.failsafe.radio) {
+        set_target_angle_and_climbrate(0,-14,rtl_deg,0,true,20);
+    }
+// Compass RTL when Radiofailsafe   
+    if (copter.failsafe.radio && !flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,-14,rtl_deg,4,true,20);
+    }else{
+        set_target_angle_and_climbrate(0,-14,rtl_deg,0,true,20);         
+    }
+    }
+
+    if (copter.failsafe.radio && flte) {
+    if (baro_alt <= g.rtl_altitude){
+        set_target_angle_and_climbrate(0,0,rtl_deg,4,true,20);
+    }else{
+        set_target_angle_and_climbrate(0,0,rtl_deg,0,true,20);         
+    }
+    }
+    
+    if (ahrs.home_is_set() && position_ok()) {
+        set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE);
+    }
+}

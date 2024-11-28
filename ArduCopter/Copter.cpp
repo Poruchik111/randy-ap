@@ -845,6 +845,15 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
     return true;
 }
 
+// Set during flight compass heading for non-GPS RTL
+void Copter::set_rtl_deg()
+{
+  rtl_deg = (ahrs.yaw_sensor / 100) + 180;
+    if (rtl_deg >= 360) {
+      rtl_deg -= 360;
+    }
+    gcs().send_text(MAV_SEVERITY_INFO, "%ld, RTL Saved", rtl_deg);
+}
 /*
   constructor for main Copter class
  */
