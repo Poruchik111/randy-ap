@@ -453,11 +453,13 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
             // do nothing, used to control the rate of the winch and is processed within AP_Winch
             break;
 
-#ifdef USERHOOK_AUXSWITCH
-        case AUX_FUNC::USER_FUNC1:
-            copter.userhook_auxSwitch1(ch_flag);
-            break;
 
+        case AUX_FUNC::USER_FUNC1:
+            if (ch_flag == AuxSwitchPos::HIGH) {
+                copter.set_rtl_deg();
+            }
+            break;
+#ifdef USERHOOK_AUXSWITCH
         case AUX_FUNC::USER_FUNC2:
             copter.userhook_auxSwitch2(ch_flag);
             break;
@@ -465,7 +467,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
         case AUX_FUNC::USER_FUNC3:
             copter.userhook_auxSwitch3(ch_flag);
             break;
-#endif
+#endif;
 
 #if MODE_ZIGZAG_ENABLED == ENABLED
         case AUX_FUNC::ZIGZAG:
