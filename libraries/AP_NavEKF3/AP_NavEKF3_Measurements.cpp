@@ -807,7 +807,7 @@ void NavEKF3_core::correctEkfOriginHeight()
         const ftype maxTerrGrad = 0.25;
         ekfOriginHgtVar += sq(maxTerrGrad * stateStruct.velocity.xy().length() * deltaTime);
     } else {
-        // by definition our height source is absolute so cannot run this filter
+                // by definition our height source is absolute so cannot run this filter
         return;
     }
     lastOriginHgtTime_ms = imuDataDelayed.time_ms;
