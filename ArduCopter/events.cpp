@@ -531,13 +531,18 @@ void Copter::crtl_timer() {
         flte = true;
         }
     }
-    if (!flightmode->in_guided_mode()) {
-    return;
-    }
 }
 
 // No GPS compass RTL func
 void Copter::compass_rtl_run() {
+    
+    if (!flightmode->in_guided_mode()) {
+        cr = false;
+    }
+
+    if (!cr) {
+    return;
+    }
 
     if (!copter.failsafe.radio) {
         set_target_angle_and_climbrate(0,-14,rtl_deg,0,true,20);
