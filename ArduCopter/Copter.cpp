@@ -855,7 +855,7 @@ void Copter::set_rtl_deg()
     if (rtl_deg >= 360) {
       rtl_deg -= 360;
     }
-    gcs().send_text(MAV_SEVERITY_INFO, "%ld, RTL Saved", rtl_deg);
+    gcs().send_text(MAV_SEVERITY_INFO, "%d, RTL Saved", rtl_deg);
 }
 /*
   constructor for main Copter class

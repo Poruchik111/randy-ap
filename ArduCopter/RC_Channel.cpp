@@ -467,7 +467,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
         case AUX_FUNC::USER_FUNC3:
             copter.userhook_auxSwitch3(ch_flag);
             break;
-#endif;
+#endif
 
 #if MODE_ZIGZAG_ENABLED == ENABLED
         case AUX_FUNC::ZIGZAG:
