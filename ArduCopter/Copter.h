@@ -807,6 +807,7 @@ private:
     uint32_t fltrc;
     uint32_t fltnorc;
     uint32_t fltfs;
+    bool cr;
     
     // failsafe.cpp
     void failsafe_enable();
