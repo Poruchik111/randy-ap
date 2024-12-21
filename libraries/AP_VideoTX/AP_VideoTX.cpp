@@ -94,7 +94,7 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
 
 extern const AP_HAL::HAL& hal;
 
-const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","L","U","O","X","1G3_A","1G3_B"};
+const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","L","U","O","X","1G3_A","1G3_B","3G3_A","3G3_B"};
 
 const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNELS] =
 {
@@ -109,6 +109,8 @@ const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNEL
     { 4990, 5020, 5050, 5080, 5110, 5140, 5170, 5200}, /* Band X */
     { 1080, 1120, 1160, 1200, 1240, 1280, 1320, 1360}, /* Band 1G3_A */
     { 1080, 1120, 1160, 1200, 1258, 1280, 1320, 1360}  /* Band 1G3_B */
+    { 3330, 3350, 3370, 3390, 3410, 3430, 3450, 3470}, /* Band 3G3_A */
+    { 3170, 3190, 3210, 3230, 3250, 3270, 3290, 3310}  /* Band 3G3_B */
   
 };
 
