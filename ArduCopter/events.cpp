@@ -302,10 +302,10 @@ void Copter::gpsglitch_check()
         ap.gps_glitching = gps_glitching;
         if (gps_glitching) {
             AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::GPS_GLITCH);
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch");
+            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS bad");
         } else {
             AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::ERROR_RESOLVED);
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"Glitch cleared");
+            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS ok");
         }
     }
 }
@@ -313,6 +313,12 @@ void Copter::gpsglitch_check()
 // dead reckoning alert and failsafe
 void Copter::failsafe_deadreckon_check()
 {
+      // exit immediately if deadreckon failsafe is disabled
+    if (g2.failsafe_dr_enable <= 0) {
+        failsafe.deadreckon = false;
+        return;
+    }
+    
     // update dead reckoning state
     const char* dr_prefix_str = "Dead Reckoning";
 
@@ -340,12 +346,6 @@ void Copter::failsafe_deadreckon_check()
             dead_reckoning.timeout = true;
             gcs().send_text(MAV_SEVERITY_CRITICAL,"%s timeout", dr_prefix_str);
         }
-    }
-
-    // exit immediately if deadreckon failsafe is disabled
-    if (g2.failsafe_dr_enable <= 0) {
-        failsafe.deadreckon = false;
-        return;
     }
 
     // check for failsafe action
