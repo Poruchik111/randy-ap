@@ -66,7 +66,9 @@ public:
         BAND_O,
         BAND_X,
         BAND_1G3_A,
-        BAND_1G3_B,        
+        BAND_1G3_B,
+        BAND_3G3_A,
+        BAND_3G3_B,       
         MAX_BANDS
     };
 
