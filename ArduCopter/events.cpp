@@ -513,4 +513,3 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
     }
 #endif
 }
-
