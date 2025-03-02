@@ -106,7 +106,9 @@ void ModeAltHold::run()
 
         uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 * kthrtl + 1100;
         target_pitch / (3.33 * (chupamotors - 1100) / 19);
-        
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
+    }else{
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1100);
     }
 
     // call attitude controller
