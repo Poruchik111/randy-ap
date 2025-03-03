@@ -367,7 +367,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
 #endif
 
     // set rate shaping time constants
-#if MODE_ACRO_ENABLED || MODE_SPORT_ENABLED
+#if MODE_ACRO_ENABLED
     attitude_control->set_roll_pitch_rate_tc(g2.command_model_acro_rp.get_rate_tc());
 #endif
     attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());

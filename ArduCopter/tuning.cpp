@@ -107,7 +107,7 @@ void Copter::tuning()
         wp_nav->set_speed_xy(tuning_value);
         break;
 
-#if MODE_ACRO_ENABLED || MODE_SPORT_ENABLED
+#if MODE_ACRO_ENABLED 
     // Acro roll pitch rates
     case TUNING_ACRO_RP_RATE:
         g2.command_model_acro_rp.set_rate(tuning_value);

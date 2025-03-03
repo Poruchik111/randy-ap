@@ -1,11 +1,8 @@
 #include "Copter.h"
-#include "../libraries/SRV_Channel/SRV_Channel.h"
 
 /*
  * Init and run calls for sport flight mode for Chupakabra
  */
-
- extern const SRV_Channel &srv();
 
 // sport_init - initialise sport controller
 bool ModeSport::init(bool ignore_checks)
@@ -25,7 +22,7 @@ bool ModeSport::init(bool ignore_checks)
 
 // althold_run - runs the althold controller
 // should be called at 100hz or more
-void ModeAltHold::run()
+void ModeSport::run()
 {
     // set vertical speed and acceleration limits
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
@@ -105,7 +102,7 @@ void ModeAltHold::run()
         uint16_t kthrtl = constrain_uint16((motors->get_throttle() - 0.2) *500, 0.05, 1.0);
 
         uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 * kthrtl + 1100;
-        target_pitch / (3.33 * (chupamotors - 1100) / 19);
+        target_pitch /= (3.33 * (chupamotors - 1100) / 19);
         SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
     }else{
         SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1100);

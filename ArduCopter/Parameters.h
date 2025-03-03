@@ -467,7 +467,7 @@ public:
 
     AP_Int16                rc_speed; // speed of fast RC Channels in Hz
 
-#if MODE_ACRO_ENABLED || MODE_SPORT_ENABLED
+#if MODE_ACRO_ENABLED 
     // Acro parameters
     AP_Float                acro_balance_roll;
     AP_Float                acro_balance_pitch;
@@ -627,7 +627,7 @@ public:
 #endif
 
     // command model parameters
-#if MODE_ACRO_ENABLED || MODE_SPORT_ENABLED
+#if MODE_ACRO_ENABLED 
     AC_CommandModel command_model_acro_rp;
 #endif
 
