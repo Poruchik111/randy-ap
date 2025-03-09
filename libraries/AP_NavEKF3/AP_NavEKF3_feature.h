@@ -19,7 +19,7 @@
 
 // external navigation on 2M boards
 #ifndef EK3_FEATURE_EXTERNAL_NAV
-#define EK3_FEATURE_EXTERNAL_NAV EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 1024
+#define EK3_FEATURE_EXTERNAL_NAV EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 512
 #endif
 
 // drag fusion on 2M boards
