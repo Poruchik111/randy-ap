@@ -626,6 +626,9 @@ void Copter::bomb_release()
 
 void Copter::compass_rtl()
 {
+    if (g.drone_type != 1){
+        return;
+    }
 
     if (!flightmode->in_guided_mode()) {
         crtl = false;    
@@ -656,18 +659,22 @@ void Copter::compass_rtl()
 
     if (copter.failsafe.radio && flte) {
     if (baro_alt <= g.rtl_altitude){
-        set_target_angle_and_climb(0,0,compass_rtl_course,6,true,45);
+        set_target_angle_and_climb(0,0,compass_rtl_course,6,true,35);
     }else{
-        set_target_angle_and_climb(0,0,compass_rtl_course,0,true,45);         
+        set_target_angle_and_climb(0,0,compass_rtl_course,0,true,35);         
     }
     }
 }
 
 void Copter::goup()
 {
+    if (g.drone_type != 0){
+        return;
+    }
+
     if ((!flightmode->in_guided_mode()) || !failsafe.radio) {
         goupinit = false;
-    return;
+        return;
     }
 
     if (!goupinit) {
