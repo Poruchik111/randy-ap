@@ -626,7 +626,7 @@ void Copter::bomb_release()
 
 void Copter::compass_rtl()
 {
-    if (g.drone_type != 1){
+    if (g.drone_type < 1){ //no rtl for kamikadze
         return;
     }
 
