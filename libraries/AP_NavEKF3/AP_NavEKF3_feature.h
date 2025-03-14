@@ -14,7 +14,7 @@
 
 // body odomotry (which includes wheel encoding) on rover or 2M boards
 #ifndef EK3_FEATURE_BODY_ODOM
-#define EK3_FEATURE_BODY_ODOM EK3_FEATURE_ALL || APM_BUILD_TYPE(APM_BUILD_Rover) || BOARD_FLASH_SIZE > 1024
+#define EK3_FEATURE_BODY_ODOM EK3_FEATURE_ALL || APM_BUILD_TYPE(APM_BUILD_Rover) || BOARD_FLASH_SIZE > 512
 #endif
 
 // external navigation on 2M boards
@@ -24,7 +24,7 @@
 
 // drag fusion on 2M boards
 #ifndef EK3_FEATURE_DRAG_FUSION
-#define EK3_FEATURE_DRAG_FUSION EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 1024
+#define EK3_FEATURE_DRAG_FUSION EK3_FEATURE_ALL || BOARD_FLASH_SIZE > 512
 #endif
 
 // Beacon Fusion if beacon data available
