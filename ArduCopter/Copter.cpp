@@ -747,6 +747,10 @@ void Copter::three_hz_loop()
 
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
+    
+    // update assigned functions and enable auxiliary servos
+    AP::srv().enable_aux_servos();
+
 }
 
 // ap_value calculates a 32-bit bitmask representing various pieces of
@@ -786,9 +790,6 @@ void Copter::one_hz_loop()
         motors->update_throttle_range();
 #endif
     }
-
-    // update assigned functions and enable auxiliary servos
-    AP::srv().enable_aux_servos();
 
 #if HAL_LOGGING_ENABLED
     // log terrain data
