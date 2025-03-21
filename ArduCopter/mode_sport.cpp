@@ -29,7 +29,7 @@ void ModeSport::run()
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
     // apply SIMPLE mode transform to pilot inputs
-    update_simple_mode();
+    //update_simple_mode();
 
     // get pilot desired lean angles
     float target_roll, target_pitch;
@@ -102,12 +102,12 @@ void ModeSport::run()
         // control Motors 5,6 over pitch stick and Throttle
         uint16_t kthrtl = constrain_uint16((motors->get_throttle_out() - 0.2) *10, 0.01, 1.0);
 
-        uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 * kthrtl + 1100;
-        target_pitch /= (3.33 * (chupamotors - 1100) / 19);
+        uint16_t chupamotors = (-target_pitch) / copter.aparm.angle_max * 800 * kthrtl + 1100;
+        target_pitch *= 0.33;
         SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
     }else{
         SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1100);
-    }
+    }   
 
     // call attitude controller
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
