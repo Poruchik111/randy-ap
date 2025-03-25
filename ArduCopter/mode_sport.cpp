@@ -1,78 +1,52 @@
 #include "Copter.h"
 
-#if MODE_SPORT_ENABLED == ENABLED
-
 /*
- * Init and run calls for sport flight mode
+ * Init and run calls for sport flight mode for Chupakabra
  */
 
 // sport_init - initialise sport controller
 bool ModeSport::init(bool ignore_checks)
 {
-    // set vertical speed and acceleration limits
-    pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
-    pos_control->set_correction_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
     // initialise the vertical position controller
     if (!pos_control->is_active_z()) {
         pos_control->init_z_controller();
     }
 
+    // set vertical speed and acceleration limits
+    pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
+    pos_control->set_correction_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
+
+    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
     return true;
 }
 
-// sport_run - runs the sport controller
+// althold_run - runs the althold controller
 // should be called at 100hz or more
 void ModeSport::run()
 {
     // set vertical speed and acceleration limits
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
-    // apply SIMPLE mode transform
-    update_simple_mode();
+    // apply SIMPLE mode transform to pilot inputs
+    //update_simple_mode();
 
-    // get pilot's desired roll and pitch rates
-
-    // calculate rate requests
-    float target_roll_rate = channel_roll->get_control_in() * g2.command_model_acro_rp.get_rate() * 100.0 / ROLL_PITCH_YAW_INPUT_MAX;
-    float target_pitch_rate = channel_pitch->get_control_in() * g2.command_model_acro_rp.get_rate() * 100.0 / ROLL_PITCH_YAW_INPUT_MAX;
-
-    // get attitude targets
-    const Vector3f att_target = attitude_control->get_att_target_euler_cd();
-
-    // Calculate trainer mode earth frame rate command for roll
-    int32_t roll_angle = wrap_180_cd(att_target.x);
-    target_roll_rate -= constrain_int32(roll_angle, -ACRO_LEVEL_MAX_ANGLE, ACRO_LEVEL_MAX_ANGLE) * g.acro_balance_roll;
-
-    // Calculate trainer mode earth frame rate command for pitch
-    int32_t pitch_angle = wrap_180_cd(att_target.y);
-    target_pitch_rate -= constrain_int32(pitch_angle, -ACRO_LEVEL_MAX_ANGLE, ACRO_LEVEL_MAX_ANGLE) * g.acro_balance_pitch;
-
-    const float angle_max = copter.aparm.angle_max;
-    if (roll_angle > angle_max){
-        target_roll_rate +=  sqrt_controller(angle_max - roll_angle, g2.command_model_acro_rp.get_rate() * 100.0 / ACRO_LEVEL_MAX_OVERSHOOT, attitude_control->get_accel_roll_max_cdss(), G_Dt);
-    }else if (roll_angle < -angle_max) {
-        target_roll_rate +=  sqrt_controller(-angle_max - roll_angle, g2.command_model_acro_rp.get_rate() * 100.0 / ACRO_LEVEL_MAX_OVERSHOOT, attitude_control->get_accel_roll_max_cdss(), G_Dt);
-    }
-
-    if (pitch_angle > angle_max){
-        target_pitch_rate +=  sqrt_controller(angle_max - pitch_angle, g2.command_model_acro_rp.get_rate() * 100.0 / ACRO_LEVEL_MAX_OVERSHOOT, attitude_control->get_accel_pitch_max_cdss(), G_Dt);
-    }else if (pitch_angle < -angle_max) {
-        target_pitch_rate +=  sqrt_controller(-angle_max - pitch_angle, g2.command_model_acro_rp.get_rate() * 100.0 / ACRO_LEVEL_MAX_OVERSHOOT, attitude_control->get_accel_pitch_max_cdss(), G_Dt);
-    }
+    // get pilot desired lean angles
+    float target_roll, target_pitch;
+    get_pilot_desired_lean_angles(target_roll, target_pitch, copter.aparm.angle_max, attitude_control->get_althold_lean_angle_max_cd());
 
     // get pilot's desired yaw rate
-    float target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->norm_input_dz());
+    float target_yaw_rate = get_pilot_desired_yaw_rate();
 
     // get pilot desired climb rate
     float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
     target_climb_rate = constrain_float(target_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
 
-    // Sport State Machine Determination
-    AltHoldModeState sport_state = get_alt_hold_state(target_climb_rate);
+    // Alt Hold State Machine Determination
+    AltHoldModeState althold_state = get_alt_hold_state(target_climb_rate);
 
-    // State Machine
-    switch (sport_state) {
+    // Alt Hold State Machine
+    switch (althold_state) {
 
     case AltHoldModeState::MotorStopped:
         attitude_control->reset_rate_controller_I_terms();
@@ -105,6 +79,11 @@ void ModeSport::run()
     case AltHoldModeState::Flying:
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
+#if AP_AVOIDANCE_ENABLED
+        // apply avoidance
+        copter.avoid.adjust_roll_pitch(target_roll, target_pitch, copter.aparm.angle_max);
+#endif
+
         // get avoidance adjusted climb rate
         target_climb_rate = get_avoidance_adjusted_climbrate(target_climb_rate);
 
@@ -118,11 +97,21 @@ void ModeSport::run()
         break;
     }
 
+    // limit front Pitch to -10 deg if max Pitch 30 deg and throttle high
+    if (target_pitch < -100){
+        // control Motors 5,6 over pitch stick and Throttle
+        //uint16_t kthrtl = constrain_uint16((motors->get_throttle_out() - 0.2) *10, 0.01, 1.0);
+
+        uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 + 1000;
+        target_pitch *= 0.33;
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
+    }else{
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
+    }   
+
     // call attitude controller
-    attitude_control->input_euler_rate_roll_pitch_yaw(target_roll_rate, target_pitch_rate, target_yaw_rate);
+    attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
 
     // run the vertical position controller and set output throttle
     pos_control->update_z_controller();
 }
-
-#endif
