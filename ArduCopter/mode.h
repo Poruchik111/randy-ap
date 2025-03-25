@@ -1545,14 +1545,13 @@ private:
 
 class ModeSport : public Mode {
 
-public:
-    // inherit constructor
+    public:
     using Mode::Mode;
     Number mode_number() const override { return Number::SPORT; }
-
+    
     bool init(bool ignore_checks) override;
     void run() override;
-
+    
     bool requires_GPS() const override { return false; }
     bool has_manual_throttle() const override { return false; }
     bool allows_arming(AP_Arming::Method method) const override { return true; };
@@ -1560,15 +1559,17 @@ public:
     bool has_user_takeoff(bool must_navigate) const override {
         return !must_navigate;
     }
-
-protected:
-
-    const char *name() const override { return "SPORT"; }
-    const char *name4() const override { return "SPRT"; }
-
-private:
-
-};
+    bool allows_autotune() const override { return true; }
+    bool allows_flip() const override { return true; }
+    
+    protected:
+    
+        const char *name() const override { return "SPORT"; }
+        const char *name4() const override { return "SPRT"; }
+    
+    private:
+    
+    };
 
 
 class ModeStabilize : public Mode {
