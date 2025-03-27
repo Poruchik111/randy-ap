@@ -1546,12 +1546,13 @@ private:
 class ModeSport : public Mode {
 
     public:
+    // inherit constructor
     using Mode::Mode;
     Number mode_number() const override { return Number::SPORT; }
-    
+
     bool init(bool ignore_checks) override;
     void run() override;
-    
+
     bool requires_GPS() const override { return false; }
     bool has_manual_throttle() const override { return false; }
     bool allows_arming(AP_Arming::Method method) const override { return true; };
@@ -1561,14 +1562,16 @@ class ModeSport : public Mode {
     }
     bool allows_autotune() const override { return true; }
     bool allows_flip() const override { return true; }
-    
-    protected:
-    
-        const char *name() const override { return "SPORT"; }
-        const char *name4() const override { return "SPRT"; }
-    
-    private:
-    
+#if FRAME_CONFIG == HELI_FRAME
+    bool allows_inverted() const override { return true; };
+#endif
+protected:
+
+    const char *name() const override { return "SPORT"; }
+    const char *name4() const override { return "SPRT"; }
+
+private:
+
     };
 
 

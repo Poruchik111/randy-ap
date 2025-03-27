@@ -1,10 +1,11 @@
 #include "Copter.h"
 
+
 /*
- * Init and run calls for sport flight mode for Chupakabra
+ * Init and run calls for althold, flight mode
  */
 
-// sport_init - initialise sport controller
+// althold_init - initialise althold controller
 bool ModeSport::init(bool ignore_checks)
 {
 
@@ -17,7 +18,6 @@ bool ModeSport::init(bool ignore_checks)
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
     pos_control->set_correction_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
-    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
     return true;
 }
 
@@ -29,14 +29,14 @@ void ModeSport::run()
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
     // apply SIMPLE mode transform to pilot inputs
-    //update_simple_mode();
+    update_simple_mode();
 
     // get pilot desired lean angles
     float target_roll, target_pitch;
     get_pilot_desired_lean_angles(target_roll, target_pitch, copter.aparm.angle_max, attitude_control->get_althold_lean_angle_max_cd());
 
     // get pilot's desired yaw rate
-    float target_yaw_rate = get_pilot_desired_yaw_rate();
+    float target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->norm_input_dz());
 
     // get pilot desired climb rate
     float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
