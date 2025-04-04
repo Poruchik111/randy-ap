@@ -312,7 +312,11 @@
 #endif
 
 #ifndef SERVO_SKYD_PWM_DEFAULT
- # define SERVO_SKYD_PWM_DEFAULT      1500     // default release bomb pwm
+ # define SERVO_SKYD_PWM_DEFAULT      1100     // default release bomb pwm
+#endif
+
+#ifndef SERVO_SKYD2_PWM_DEFAULT
+ # define SERVO_SKYD2_PWM_DEFAULT      1900     // default release bomb2 pwm
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

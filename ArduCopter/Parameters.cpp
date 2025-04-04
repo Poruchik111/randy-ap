@@ -46,6 +46,14 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(drop_pwm, "SERVO_SKYD_PWM",  SERVO_SKYD_PWM_DEFAULT),
 
+    // @Param: SERVO_SKYD2_PWM
+    // @DisplayName: Bomb2 Release PWM
+    // @Description: PWM value in microseconds sent to release the Bomb
+    // @Range: 1000 2000
+    // @Units: PWM
+    // @User: Standard
+    GSCALAR(drop_pwm, "SERVO_SKYD2_PWM",  SERVO_SKYD2_PWM_DEFAULT),
+
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format

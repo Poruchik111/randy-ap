@@ -836,6 +836,8 @@ private:
     void ignition_timer();
     void ignition();
     void bomb_release();
+    void bomb_release2();
+    void bomb_zero();
    // Guided non GPS mode in Land with pause to up to RTL ALT
     void goup();
     void compass_rtl();

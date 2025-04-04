@@ -592,7 +592,7 @@ void Copter::ignition()
 
 void Copter::bomb_release()
 {
-    if (g.drone_type != 1) { // drone_type Bomber
+    if (g.drone_type > 0) { // drone_type Bomber
     return;
     }
 
@@ -624,6 +624,76 @@ void Copter::bomb_release()
     }
 }
 
+void Copter::bomb_release2()
+{
+    if (g.drone_type != 2) { // drone_type Bomber 2 places
+    return;
+    }
+
+    const uint32_t release_time = AP_HAL::millis();
+
+   if (releasing != release) {
+       releasing = release;
+       if (releasing){
+        last_release = release_time;        
+       }else{
+        last_release = 0;
+        release_timeout = false;
+       }
+   }
+   
+    if (releasing && !release_timeout){
+                    // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm2);
+       
+        if (release_time - last_release > 1000){
+            release_timeout = true;
+            release = false;
+            //set PWM 0 after servo released
+            SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+            if (motors->armed()) {
+                released = true;
+            }
+        }
+    }
+}
+
+void Copter::bomb_zero()
+{
+    if (g.drone_type != 2) { // drone_type Bomber 2 places
+        return;
+    }
+    
+    const uint32_t release_time = AP_HAL::millis();
+
+        if (releasing != release) {
+            releasing = release;
+            if (releasing){
+             last_release = release_time;        
+            }else{
+             last_release = 0;
+             release_timeout = false;
+            }
+        }
+        
+         if (releasing && !release_timeout){
+                         // move the servo to the release position
+             SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
+            
+             if (release_time - last_release > 1000){
+                 release_timeout = true;
+                 release = false;
+                 //set PWM 0 after servo released
+                 SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+                if (motors->armed()) {
+                     released = true;
+                }
+            }
+        }
+                     
+
+}
+
 void Copter::compass_rtl()
 {
     if (g.drone_type < 1){ //no rtl for kamikadze
@@ -639,7 +709,7 @@ void Copter::compass_rtl()
         return;
     }
 
-    if (!hw_safety_sw && p_safety_sw.timeout && !released && failsafe.radio){
+    if (g.drone_type != 2 && !hw_safety_sw && p_safety_sw.timeout && !released && failsafe.radio){
         release = true;
         bomb_release(); 
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
