@@ -661,6 +661,8 @@ void Copter::three_hz_loop()
     low_alt_avoidance();
 
     bomb_release();
+    bomb_release2();
+    bomb_zero();
 
     // update assigned functions and enable auxiliary servos
     SRV_Channels::enable_aux_servos();
@@ -688,7 +690,7 @@ void Copter::one_hz_loop()
     }
 
     ignition_timer();
-   // calc_mean_heading();
+
     
 
 #if HAL_LOGGING_ENABLED
