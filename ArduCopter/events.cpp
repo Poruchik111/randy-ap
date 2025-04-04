@@ -644,7 +644,7 @@ void Copter::bomb_release2()
    
     if (releasing && !release_timeout){
                     // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm2);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);
        
         if (release_time - last_release > 1000){
             release_timeout = true;

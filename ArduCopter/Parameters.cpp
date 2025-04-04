@@ -52,7 +52,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Range: 1000 2000
     // @Units: PWM
     // @User: Standard
-    GSCALAR(drop_pwm, "SERVO_SKYD2_PWM",  SERVO_SKYD2_PWM_DEFAULT),
+    GSCALAR(drop2_pwm, "SERVO_SKYD2_PWM",  SERVO_SKYD2_PWM_DEFAULT),
 
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
