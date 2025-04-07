@@ -438,11 +438,13 @@ private:
 
     uint8_t hw_safety_sw;
     uint8_t hw_boom_sw;
-    uint8_t releasing = false;
-    uint8_t release_timeout;
-    uint32_t last_release;
-    uint8_t released;
-    uint8_t release;
+    uint32_t servo_moving_time;
+    bool time_locked;
+    bool released;
+    bool release;
+    bool released2;
+    bool release2;
+    bool zero;
     uint64_t flth;
     uint64_t fltrc;
     uint64_t fltnorc;

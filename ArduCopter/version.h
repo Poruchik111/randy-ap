@@ -6,7 +6,7 @@
 
 #include "ap_version.h"
 
-#define THISFIRMWARE "Black Sky V4.5.7."
+#define THISFIRMWARE "Black Sky2 V4.5.7."
 
 // the following line is parsed by the autotest scripts
 #define FIRMWARE_VERSION 4,5,7,FIRMWARE_VERSION_TYPE_DEV

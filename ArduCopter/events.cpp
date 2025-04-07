@@ -592,106 +592,101 @@ void Copter::ignition()
 
 void Copter::bomb_release()
 {
-    if (g.drone_type > 0) { // drone_type Bomber
+    const uint32_t _time = AP_HAL::millis();
+
+    if (g.drone_type < 1) { // drone_type Bomber
     return;
     }
 
-    const uint32_t release_time = AP_HAL::millis();
-
-   if (releasing != release) {
-       releasing = release;
-       if (releasing){
-        last_release = release_time;        
-       }else{
-        last_release = 0;
-        release_timeout = false;
-       }
-   }
-   
-    if (releasing && !release_timeout){
-                    // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);
-       
-        if (release_time - last_release > 1000){
-            release_timeout = true;
-            release = false;
-            //set PWM 0 after servo released
-            SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
-            if (motors->armed()) {
-                released = true;
-            }
-        }
+    if (!release) { 
+        return;
     }
+
+    if (!time_locked){
+        servo_moving_time = _time;
+        time_locked = true;
+    } 
+      
+    if (_time - servo_moving_time < 1200){
+        // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);   
+    }else{
+         //set PWM 0 after servo released
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+        release = false;
+        time_locked = false;
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"B1 time 620");
+        if (motors->armed()) {
+            released = true;
+        }
+        return;
+    }
+    
 }
 
 void Copter::bomb_release2()
 {
+    const uint32_t _time2 = AP_HAL::millis();
+   
     if (g.drone_type != 2) { // drone_type Bomber 2 places
     return;
     }
-
-    const uint32_t release_time = AP_HAL::millis();
-
-   if (releasing != release) {
-       releasing = release;
-       if (releasing){
-        last_release = release_time;        
-       }else{
-        last_release = 0;
-        release_timeout = false;
-       }
-   }
-   
-    if (releasing && !release_timeout){
-                    // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);
-       
-        if (release_time - last_release > 1000){
-            release_timeout = true;
-            release = false;
-            //set PWM 0 after servo released
-            SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
-            if (motors->armed()) {
-                released = true;
-            }
-        }
+    
+    if (!release2) { 
+        return;
     }
+
+    if (!time_locked) {
+        servo_moving_time = _time2;
+        time_locked = true;
+    }
+    
+    if (_time2 - servo_moving_time < 1200){
+        // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);   
+    }else{
+        //set PWM 0 after servo released
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+        release2 = false;
+        time_locked = false;
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"B2 time 656");
+        if (motors->armed()) {
+            released2 = true;
+        }
+        return;
+    }   
+    
 }
 
 void Copter::bomb_zero()
 {
+    const uint32_t zero_time = AP_HAL::millis();
+
     if (g.drone_type != 2) { // drone_type Bomber 2 places
         return;
     }
     
-    const uint32_t release_time = AP_HAL::millis();
-
-        if (releasing != release) {
-            releasing = release;
-            if (releasing){
-             last_release = release_time;        
-            }else{
-             last_release = 0;
-             release_timeout = false;
-            }
-        }
-        
-         if (releasing && !release_timeout){
-                         // move the servo to the release position
-             SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
-            
-             if (release_time - last_release > 1000){
-                 release_timeout = true;
-                 release = false;
-                 //set PWM 0 after servo released
-                 SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
-                if (motors->armed()) {
-                     released = true;
-                }
-            }
-        }
-                     
-
+    if (!zero) { 
+        return;
+    }
+    
+    if (!time_locked){
+        servo_moving_time = zero_time;
+        time_locked = true;
+    }     
+      
+    if ( zero_time - servo_moving_time < 600){
+        // move the servo to the release position
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);   
+    }else{
+         //set PWM 0 after servo released
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+        zero = false;
+        time_locked = false;
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"zero time 692");
+        return;
+    }
+    
 }
 
 void Copter::compass_rtl()
