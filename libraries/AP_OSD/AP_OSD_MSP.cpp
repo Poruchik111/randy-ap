@@ -114,10 +114,14 @@ static const struct AP_Param::defaults_table_struct defaults_table[] = {
 
     // OSD items disabled by default (partially supported)
     //OSD_CROSSHAIRS
-    { "OSD_CRSSHAIR_EN",       0 },
+    { "OSD_CRSSHAIR_EN",       1.0 },
+    { "OSD_CRSSHAIR_X",       1.0 },
+    { "OSD_CRSSHAIR_Y",       1.0 },
 
     //OSD_ARTIFICIAL_HORIZON
-    { "OSD_HORIZON_EN",        0 },
+    { "OSD_HORIZON_EN",        1.0 },
+    { "OSD_HORIZON_X",        1.0 },
+    { "OSD_HORIZON_Y",        1.0 },
 
     //OSD_HORIZON_SIDEBARS
     { "OSD_SIDEBARS_EN",       0 },

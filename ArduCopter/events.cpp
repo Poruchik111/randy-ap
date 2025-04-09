@@ -615,7 +615,7 @@ void Copter::bomb_release()
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
         release = false;
         time_locked = false;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"B1 time 620");
+
         if (motors->armed()) {
             released = true;
         }
@@ -649,7 +649,7 @@ void Copter::bomb_release2()
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
         release2 = false;
         time_locked = false;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"B2 time 656");
+        
         if (motors->armed()) {
             released2 = true;
         }
