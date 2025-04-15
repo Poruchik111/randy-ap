@@ -615,8 +615,8 @@ void Copter::gripper_release()
         // move the servo to the release position
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);   
     }else{
-         //set PWM 0 after servo released
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+         //set PWM 1500 after servo released
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
         release = false;
         time_locked = false;
 
@@ -651,8 +651,8 @@ void Copter::gripper_release2()
         // move the servo to the release position
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);   
     }else{
-        //set PWM 0 after servo released
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
+        //set PWM 1500 after servo released
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
         release2 = false;
         time_locked = false;
         
