@@ -445,6 +445,8 @@ private:
     bool released2;
     bool release2;
     bool zero;
+    bool zeroed;
+    bool autod_timeout;
     uint64_t flth;
     uint64_t fltrc;
     uint64_t fltnorc;
@@ -837,9 +839,10 @@ private:
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);
     void ignition_timer();
     void ignition();
-    void bomb_release();
-    void bomb_release2();
-    void bomb_zero();
+    void gripper_release();
+    void gripper_release2();
+    void gripper_center();
+    void autodrop();
    // Guided non GPS mode in Land with pause to up to RTL ALT
     void goup();
     void compass_rtl();

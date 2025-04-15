@@ -660,9 +660,10 @@ void Copter::three_hz_loop()
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
 
-    bomb_release();
-    bomb_release2();
-    bomb_zero();
+    gripper_release();
+    gripper_release2();
+    gripper_center();
+    autodrop();
 
     // update assigned functions and enable auxiliary servos
     SRV_Channels::enable_aux_servos();

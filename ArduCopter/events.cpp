@@ -474,6 +474,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             break;
         case FailsafeAction::RTL:
             set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE); //compass rtl if no gps
+
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
@@ -515,11 +516,14 @@ void Copter::ignition_timer()
         fltnorc = t; // time when RC fail
         flte = false;
     }else{
-        fltfs = t - fltnorc; //time we flying in Compass RTL
+        fltfs = t - fltnorc; //time we flying in RTL
         fltrc = t;// time when RC ok
         
         if (fltfs > (flth * 0.1 * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 1.0f, 0.0f, UINT32_MAX))))) {
             flte = true;
+        }
+        if (AP_HAL::millis() * 1000 - fltnorc > 30){
+            autod_timeout = true;
         }
     }
 
@@ -590,7 +594,7 @@ void Copter::ignition()
 }
 
 
-void Copter::bomb_release()
+void Copter::gripper_release()
 {
     const uint32_t _time = AP_HAL::millis();
 
@@ -618,13 +622,15 @@ void Copter::bomb_release()
 
         if (motors->armed()) {
             released = true;
+            zero = true;
+            gripper_center();
         }
         return;
     }
     
 }
 
-void Copter::bomb_release2()
+void Copter::gripper_release2()
 {
     const uint32_t _time2 = AP_HAL::millis();
    
@@ -652,17 +658,19 @@ void Copter::bomb_release2()
         
         if (motors->armed()) {
             released2 = true;
+            zero = true;
+            gripper_center();
         }
         return;
     }   
     
 }
 
-void Copter::bomb_zero()
+void Copter::gripper_center()
 {
     const uint32_t zero_time = AP_HAL::millis();
 
-    if (g.drone_type != 2) { // drone_type Bomber 2 places
+    if (g.drone_type != 2) { // drone_type Bomber 2 places one servo
         return;
     }
     
@@ -683,10 +691,33 @@ void Copter::bomb_zero()
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 0);
         zero = false;
         time_locked = false;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO,"zero time 692");
+        zeroed = true;
         return;
     }
     
+}
+
+void Copter::autodrop()
+{
+    if (!failsafe.radio && !motors->armed() && !autod_timeout){
+        return;
+    }
+
+    if (released && released2){
+        return;
+    }
+
+    if (g.drone_type > 0 && !hw_safety_sw && p_safety_sw.timeout && !released){
+        release = true;
+        gripper_release(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB1 DROPPED!");
+    }
+
+    if (g.drone_type > 1 && !hw_safety_sw && p_safety_sw.timeout && !released2){
+        release2 = true;
+        gripper_release2(); 
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB2 DROPPED!");
+    }
 }
 
 void Copter::compass_rtl()
@@ -702,12 +733,6 @@ void Copter::compass_rtl()
         //exit if Compass RTL not called
     if (!crtl){
         return;
-    }
-
-    if (g.drone_type != 2 && !hw_safety_sw && p_safety_sw.timeout && !released && failsafe.radio){
-        release = true;
-        bomb_release(); 
-        gcs().send_text(MAV_SEVERITY_INFO, "BOMB AUTO DROPPED!");
     }
         //compass rtl when radio ok
     if (!failsafe.radio) {
@@ -733,7 +758,7 @@ void Copter::compass_rtl()
 
 void Copter::goup()
 {
-    if (g.drone_type != 0){
+    if (g.drone_type > 0){
         return;
     }
 

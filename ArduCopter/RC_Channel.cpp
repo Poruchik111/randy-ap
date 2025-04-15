@@ -384,7 +384,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                         copter.release2 = false;
                         copter.zero = false;
                         copter.release = true;
-                    copter.bomb_release();
+                    copter.gripper_release();
                     }
                     if (copter.p_safety_sw.timeout && copter.hw_safety_sw) {
                     GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE SWITCH!");
@@ -399,7 +399,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                     copter.release2 = false;
                     copter.zero = false;
                     copter.release = true;
-                    copter.bomb_release();
+                    copter.gripper_release();
                 }
                     break;
 
@@ -408,7 +408,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                     copter.release = false;
                     copter.release2 = false;
                     copter.zero = true;
-                    copter.bomb_zero();
+                    copter.gripper_center();
                 }
                     break;
 
@@ -419,7 +419,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                         copter.release = false;
                         copter.zero = false;
                         copter.release2 = true;
-                        copter.bomb_release2();
+                        copter.gripper_release2();
                     }
                     if (copter.p_safety_sw.timeout && copter.hw_safety_sw) {
                     GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE SWITCH!");
@@ -434,7 +434,7 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                         copter.zero = false;
                         copter.release = false;
                         copter.release2 = true;
-                        copter.bomb_release2();
+                        copter.gripper_release2();
                     }
                 }
                     break;
