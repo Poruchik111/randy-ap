@@ -613,7 +613,8 @@ void Copter::gripper_release()
       
     if (_time - servo_moving_time < 1200){
         // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);   
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop_pwm);
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB1 AWAY");   
     }else{
          //set PWM 1500 after servo released
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
@@ -649,7 +650,8 @@ void Copter::gripper_release2()
     
     if (_time2 - servo_moving_time < 1200){
         // move the servo to the release position
-        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);   
+        SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, g.drop2_pwm);
+        gcs().send_text(MAV_SEVERITY_INFO, "BOMB2 AWAY");  
     }else{
         //set PWM 1500 after servo released
         SRV_Channels::set_output_pwm(SRV_Channel::k_gripper, 1500);
