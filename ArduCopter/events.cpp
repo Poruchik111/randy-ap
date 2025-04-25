@@ -522,7 +522,7 @@ void Copter::ignition_timer()
         if (fltfs > (flth * 0.1 * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 1.0f, 0.0f, UINT32_MAX))))) {
             flte = true;
         }
-        if (AP_HAL::millis() * 1000 - fltnorc > 30){
+        if (time_ms / 1000 - fltnorc > 30){
             autod_timeout = true;
         }
     }
@@ -701,9 +701,18 @@ void Copter::gripper_center()
 
 void Copter::autodrop()
 {
-    if (!failsafe.radio && !motors->armed() && !autod_timeout){
+    if (!failsafe.radio){
         return;
     }
+
+    if (!motors->armed()){
+        return;
+    }
+    
+    if (!autod_timeout){
+        return;
+    }
+    gcs().send_text(MAV_SEVERITY_INFO, "timeout 711");
 
     if (released && released2){
         return;
@@ -715,7 +724,7 @@ void Copter::autodrop()
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB1 DROPPED!");
     }
 
-    if (g.drone_type > 1 && !hw_safety_sw && p_safety_sw.timeout && !released2){
+    if (g.drone_type > 1 && !hw_safety_sw && p_safety_sw.timeout && released && !released2){
         release2 = true;
         gripper_release2(); 
         gcs().send_text(MAV_SEVERITY_INFO, "BOMB2 DROPPED!");
@@ -741,7 +750,7 @@ void Copter::compass_rtl()
         set_target_angle_and_climb(0,-30,compass_rtl_course,0,true,35);
     }
         // Compass RTL when Radiofailsafe   
-    if (copter.failsafe.radio && !flte) {
+    if (failsafe.radio && !flte) {
     if (baro_alt <= g.rtl_altitude){
         set_target_angle_and_climb(0, 0,ahrs.get_yaw(),6,true,35);
     }else{
@@ -749,7 +758,7 @@ void Copter::compass_rtl()
     }
     }
 
-    if (copter.failsafe.radio && flte) {
+    if (failsafe.radio && flte) {
     if (baro_alt <= g.rtl_altitude){
         set_target_angle_and_climb(0,0,compass_rtl_course,6,true,35);
     }else{
