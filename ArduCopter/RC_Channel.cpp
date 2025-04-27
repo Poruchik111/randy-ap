@@ -318,7 +318,9 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
             copter.hw_safety_sw = true;            
                if(copter.motors->armed()) {
                GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE ON, WEAPON DISARMED");
-               }
+            }else{
+                GCS_SEND_TEXT(MAV_SEVERITY_INFO,"SAFE ON");
+            }
             break;
 
             case AuxSwitchPos::MIDDLE:
