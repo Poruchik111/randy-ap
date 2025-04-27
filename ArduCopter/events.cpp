@@ -522,7 +522,7 @@ void Copter::ignition_timer()
         if (fltfs > (flth * 0.1 * (uint32_t(constrain_float(g2.failsafe_dr_timeout * 1.0f, 0.0f, UINT32_MAX))))) {
             flte = true;
         }
-        if (time_ms / 1000 - fltnorc > 30){
+        if (fltfs > 20){
             autod_timeout = true;
         }
     }
@@ -712,7 +712,6 @@ void Copter::autodrop()
     if (!autod_timeout){
         return;
     }
-    gcs().send_text(MAV_SEVERITY_INFO, "timeout 711");
 
     if (released && released2){
         return;

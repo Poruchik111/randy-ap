@@ -404,12 +404,6 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                     break;
 
                 case AuxSwitchPos::MIDDLE:
-                if (copter.g.drone_type == 2){
-                    copter.release = false;
-                    copter.release2 = false;
-                    copter.zero = true;
-                    copter.gripper_center();
-                }
                     break;
 
                 case AuxSwitchPos::LOW:
