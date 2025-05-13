@@ -29,7 +29,7 @@ void ModeSport::run()
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
     // apply SIMPLE mode transform to pilot inputs
-    update_simple_mode();
+  //  update_simple_mode();
 
     // get pilot desired lean angles
     float target_roll, target_pitch;
