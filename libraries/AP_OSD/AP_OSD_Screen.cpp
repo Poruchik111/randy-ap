@@ -881,7 +881,8 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
     // @Param: CALLSIGN_EN
     // @DisplayName: CALLSIGN_EN
     // @Description: Displays callsign from callsign.txt on microSD card
-    // @Values: 0:Disabled,1:Enabled
+    // @Values: 1:Enabled
+    // @ReadOnly: True
 
     // @Param: CALLSIGN_X
     // @DisplayName: CALLSIGN_X
@@ -2463,7 +2464,7 @@ void AP_OSD_Screen::draw_pluscode(uint8_t x, uint8_t y)
  */
 void AP_OSD_Screen::draw_callsign(uint8_t x, uint8_t y)
 {
-    backend->write(x, y, false, "FREIBOMBER");
+    backend->write(x, y, false, "CANNIBAL");
 }
 
 void AP_OSD_Screen::draw_current2(uint8_t x, uint8_t y)

@@ -34,7 +34,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Param: FRAME_DRONE_TYPE
     // @DisplayName: Drone Type
     // @Description: Drone Type- kamikadze or Bomber
-    // @Values: 0:Kamikadze, 1:Bomber
+    // @Values: 0:Kamikadze, 1:Bomber 2:Bomber 2 place one servo
     // @User: Advanced
     GSCALAR(drone_type, "FRAME_DRONE_TYPE" , FRAME_DRONE_TYPE_DEFAULT),
 
