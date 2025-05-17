@@ -877,7 +877,6 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
     AP_SUBGROUPINFO(pluscode, "PLUSCODE", 52, AP_OSD_Screen, AP_OSD_Setting),
 #endif
 
-#if AP_OSD_CALLSIGN_FROM_SD_ENABLED
     // @Param: CALLSIGN_EN
     // @DisplayName: CALLSIGN_EN
     // @Description: Displays callsign from callsign.txt on microSD card
@@ -894,7 +893,6 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
     // @Description: Vertical position on screen
     // @Range: 0 21
     AP_SUBGROUPINFO(callsign, "CALLSIGN", 53, AP_OSD_Screen, AP_OSD_Setting),
-#endif
 
     // @Param: CURRENT2_EN
     // @DisplayName: CURRENT2_EN
