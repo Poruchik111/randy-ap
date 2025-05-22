@@ -356,7 +356,7 @@
 # define LAND_DETECTOR_ACCEL_LPF_CUTOFF     1.0f    // frequency cutoff of land detector accelerometer filter
 #endif
 #ifndef LAND_DETECTOR_ACCEL_MAX
-# define LAND_DETECTOR_ACCEL_MAX            3.0f    // vehicle acceleration must be under 1m/s/s
+# define LAND_DETECTOR_ACCEL_MAX            2.0f    // vehicle acceleration must be under 1m/s/s
 #endif
 #ifndef LAND_DETECTOR_VEL_Z_MAX
 # define LAND_DETECTOR_VEL_Z_MAX              2.0f    // vehicle vertical velocity must be under 1m/s
