@@ -194,10 +194,12 @@ private:
 
     // frequency band
     AP_Int8 _band;
+    AP_Int8 _band1;
     uint16_t _current_band;
 
     // frequency channel
     AP_Int8 _channel;
+    AP_Int8 _channel1;
     uint8_t _current_channel;
 
     // vtx options

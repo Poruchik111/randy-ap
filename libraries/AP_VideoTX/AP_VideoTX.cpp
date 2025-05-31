@@ -74,7 +74,22 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
     // @Description: Video Transmitter Maximum Power Level. Different VTXs support different power levels, this prevents the power aux switch from requesting too high a power level. The switch supports 6 power levels and the selected power will be a subdivision between 0 and this setting.
     // @Range: 25 1000
     AP_GROUPINFO("MAX_POWER", 7, AP_VideoTX, _max_power_mw, 800),
-    
+
+    // @Param: CHANNEL
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("CHANNEL1",  8, AP_VideoTX, _channel1, 0),
+
+    // @Param: BAND
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("BAND1",  9, AP_VideoTX, _band1, 0),
+
+
     AP_GROUPEND
 };
 
@@ -87,7 +102,7 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
 
 extern const AP_HAL::HAL& hal;
 
-const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","H","L","U","O","X","1G3_A","1G3_B","3G3_A","3G3_B"};
+const char * AP_VideoTX::band_names[] = {"A","B","E","F","R","H","L","U","O","X","1G3_A","1G3_B"};
 
 const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNELS] =
 {
@@ -96,15 +111,12 @@ const uint16_t AP_VideoTX::VIDEO_CHANNELS[AP_VideoTX::MAX_BANDS][VTX_MAX_CHANNEL
     { 5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945}, /* Band E */
     { 5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, /* Band F */
     { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, /* Band R */
-    { 5653,	5693, 5733,	5773, 5813,	5853, 5893,	5933}, /* Band H */
     { 5333, 5373, 5413, 5453, 5493, 5533, 5573, 5613}, /* Band L */
     { 5325, 5348, 5366, 5384, 5402, 5420, 5438, 5456}, /* Band U */
     { 5474, 5492, 5510, 5528, 5546, 5564, 5582, 5600}, /* Band O */
     { 4990, 5020, 5050, 5080, 5110, 5140, 5170, 5200}, /* Band X */
     { 1080, 1120, 1160, 1200, 1240, 1280, 1320, 1360}, /* Band 1G3_A */
-    { 1080, 1120, 1160, 1200, 1258, 1280, 1320, 1360},  /* Band 1G3_B */
-    { 3320, 3345, 3370, 3395, 3420, 3445, 3470, 3495}, /* Band 3G3_A */
-    { 3310, 3330, 3355, 3380, 3405, 3430, 3455, 3480}  /* Band 3G3_B */
+    { 1080, 1120, 1160, 1200, 1258, 1280, 1320, 1360}  /* Band 1G3_B */
   
 };
 
@@ -157,7 +169,7 @@ bool AP_VideoTX::init(void)
                 if (i > 0) {
                     _current_power = i - 1;
                 }
-                _power_mw.set_and_save(get_power_mw());
+                _power_mw.set_and_save(get_power_mw()); //get current power from VTX and save to config
             } else {
                 _current_power = i;
             }
@@ -179,9 +191,9 @@ bool AP_VideoTX::get_band_and_channel(uint16_t freq, VideoBand& band, uint8_t& c
     for (uint8_t i = 0; i < AP_VideoTX::MAX_BANDS; i++) {
         for (uint8_t j = 0; j < VTX_MAX_CHANNELS; j++) {
             if (VIDEO_CHANNELS[i][j] == freq) {
-                band = VideoBand(i);
-                channel = j;
-                return true;
+                band = VideoBand(i); //from VTX table
+                channel = j;         //
+                return true; // if freq found in VTX table
             }
         }
     }
@@ -451,18 +463,18 @@ bool AP_VideoTX::set_defaults()
     // if not then force one to be correct
     uint16_t calced_freq = get_frequency_mhz(_current_band, _current_channel);
     if (_current_frequency != calced_freq) {
-        if (_current_frequency > 0) {
-            VideoBand band;
-            uint8_t channel;
-            if (get_band_and_channel(_current_frequency, band, channel)) {
-                _current_band = band;
-                _current_channel = channel;
-            } else {
-                _current_frequency = calced_freq;
-            }
-        } else {
+        //if (_current_frequency > 0) {
+        //    VideoBand band;
+        //    uint8_t channel;
+        //    if (get_band_and_channel(_current_frequency, band, channel)) {
+        //        _current_band = band;
+        //        _current_channel = channel;
+        //    } else {
+        //        _current_frequency = calced_freq;
+        //    }
+        //} else {
             _current_frequency = calced_freq;
-        }
+        //}
     }
 
     if (!_options.configured()) {
@@ -486,7 +498,7 @@ bool AP_VideoTX::set_defaults()
         if (_frequency_mhz > 0) {
             update_configured_channel_and_band();
         } else {
-            update_configured_frequency();
+           update_configured_frequency();
         }
     }
 
