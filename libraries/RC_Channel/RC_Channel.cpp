@@ -672,6 +672,7 @@ void RC_Channel::init_aux_function(const AUX_FUNC ch_option, const AuxSwitchPos 
 #endif
 #if AP_VIDEOTX_ENABLED
     case AUX_FUNC::VTX_POWER:
+    case AUX_FUNC::USER_FUNC1:
 #endif
 #if AP_OPTICALFLOW_CALIBRATOR_ENABLED
     case AUX_FUNC::OPTFLOW_CAL:
@@ -857,6 +858,22 @@ bool RC_Channel::read_aux()
         int8_t position;
         if (read_6pos_switch(position)) {
             AP::vtx().change_power(position);
+            return true;
+        }
+        return false;
+#endif  // AP_VIDEOTX_ENABLED
+    }
+
+    const AUX_FUNC _optionvtx = (AUX_FUNC)option.get();
+    if (_optionvtx == AUX_FUNC::DO_NOTHING) {
+        // may wish to add special cases for other "AUXSW" things
+        // here e.g. RCMAP_ROLL etc once they become options
+        return false;
+#if AP_VIDEOTX_ENABLED
+    } else if (_optionvtx == AUX_FUNC::USER_FUNC1) {
+        int8_t position;
+        if (read_6pos_switch(position)) {
+            AP::vtx().set_freq_is_current(position);
             return true;
         }
         return false;
@@ -1210,7 +1227,7 @@ void RC_Channel::do_aux_function_gripper(const AuxSwitchPos ch_flag)
         // nothing
         break;
     case AuxSwitchPos::HIGH:
-        gripper.grab();
+        
         break;
     }
 }
