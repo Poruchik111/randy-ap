@@ -75,19 +75,90 @@ const AP_Param::GroupInfo AP_VideoTX::var_info[] = {
     // @Range: 25 1000
     AP_GROUPINFO("MAX_POWER", 7, AP_VideoTX, _max_power_mw, 800),
 
-    // @Param: CHANNEL
+    // @Param: CHANNEL1
     // @DisplayName: Video Transmitter Channel
     // @Description: Video Transmitter Channel
     // @User: Standard
     // @Range: 0 7
-    AP_GROUPINFO("CHANNEL1",  8, AP_VideoTX, _channel1, 0),
+    AP_GROUPINFO("S_CHANNEL1",  8, AP_VideoTX, _channel1, 0),
 
-    // @Param: BAND
+    // @Param: BAND1
     // @DisplayName: Video Transmitter Band
     // @Description: Video Transmitter Band
     // @User: Standard
     // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
-    AP_GROUPINFO("BAND1",  9, AP_VideoTX, _band1, 0),
+    AP_GROUPINFO("S_BAND1",  9, AP_VideoTX, _band1, 0),
+
+    // @Param: CHANNEL2
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("s_CHANNEL2",  10, AP_VideoTX, _channel2, 0),
+
+    // @Param: BAND2
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("S_BAND2",  11, AP_VideoTX, _band2, 0),
+
+    // @Param: CHANNEL3
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("s_CHANNEL3",  12, AP_VideoTX, _channel3, 0),
+
+    // @Param: BAND3
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("S_BAND3",  13, AP_VideoTX, _band3, 0),
+
+    // @Param: CHANNEL4
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("S_CHANNEL4",  14, AP_VideoTX, _channel4, 0),
+
+    // @Param: BAND4
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("S_BAND4",  15, AP_VideoTX, _band4, 0),
+
+// @Param: CHANNEL5
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("S_CHANNEL5",  16, AP_VideoTX, _channel5, 0),
+
+    // @Param: BAND5
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("S_BAND5",  17, AP_VideoTX, _band5, 0),
+
+    // @Param: CHANNEL6
+    // @DisplayName: Video Transmitter Channel
+    // @Description: Video Transmitter Channel
+    // @User: Standard
+    // @Range: 0 7
+    AP_GROUPINFO("S_CHANNEL6",  18, AP_VideoTX, _channel6, 0),
+
+    // @Param: BAND6
+    // @DisplayName: Video Transmitter Band
+    // @Description: Video Transmitter Band
+    // @User: Standard
+    // @Values: 0:Band A,1:Band B,2:Band E,3:Band F,4:Band R,5:Band H,6:Band L,7:Band U,8:Band O,9:Band X,10:1G3 Band A,11:1G3 Band B
+    AP_GROUPINFO("S_BAND6",  19, AP_VideoTX, _band6, 0),
+
 
 
     AP_GROUPEND
@@ -169,7 +240,7 @@ bool AP_VideoTX::init(void)
                 if (i > 0) {
                     _current_power = i - 1;
                 }
-                _power_mw.set_and_save(get_power_mw()); //get current power from VTX and save to config
+                _power_mw.set_and_save(get_power_mw());
             } else {
                 _current_power = i;
             }
@@ -191,9 +262,9 @@ bool AP_VideoTX::get_band_and_channel(uint16_t freq, VideoBand& band, uint8_t& c
     for (uint8_t i = 0; i < AP_VideoTX::MAX_BANDS; i++) {
         for (uint8_t j = 0; j < VTX_MAX_CHANNELS; j++) {
             if (VIDEO_CHANNELS[i][j] == freq) {
-                band = VideoBand(i); //from VTX table
-                channel = j;         //
-                return true; // if freq found in VTX table
+                band = VideoBand(i);
+                channel = j;
+                return true;
             }
         }
     }
@@ -346,11 +417,52 @@ void AP_VideoTX::set_power_is_current()
     set_power_dbm(get_configured_power_dbm());
 }
 
-void AP_VideoTX::set_freq_is_current()
+void AP_VideoTX::set_freq_is_current(int8_t position)
 {
+    
+    if (position == 0){
+        _current_band = _band1;
+        _current_channel = _channel1;
+        _channel.set_and_save(_current_channel);
+        _band.set_and_save(_current_band);
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos1");
+
+    }else if (position == 1){
+            _current_band = _band2;
+            _current_channel = _channel2;
+            _channel.set_and_save(_current_channel);
+            _band.set_and_save(_current_band);
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos2");
+
+    }else if (position == 2){
+            _current_band = _band3;
+            _current_channel = _channel3;
+            _channel.set_and_save(_current_channel);
+            _band.set_and_save(_current_band);
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos3");
+
+    }else if (position == 3){
+            _current_band = _band4;
+            _current_channel = _channel4;
+            _channel.set_and_save(_current_channel);
+            _band.set_and_save(_current_band);
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos4");
+    }else if (position == 4){
+            _current_band = _band5;
+            _current_channel = _channel5;
+            _channel.set_and_save(_current_channel);
+            _band.set_and_save(_current_band);
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos5");
+    }else if (position == 5){
+            _current_band = _band6;
+            _current_channel = _channel6;
+            _channel.set_and_save(_current_channel);
+            _band.set_and_save(_current_band);
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VTX pos6");
+    }       
+   
     _current_frequency = _frequency_mhz;
-    _current_band = _band;
-    _current_channel = _channel;
+    
 }
 
 // periodic update
@@ -463,18 +575,18 @@ bool AP_VideoTX::set_defaults()
     // if not then force one to be correct
     uint16_t calced_freq = get_frequency_mhz(_current_band, _current_channel);
     if (_current_frequency != calced_freq) {
-        //if (_current_frequency > 0) {
-        //    VideoBand band;
-        //    uint8_t channel;
-        //    if (get_band_and_channel(_current_frequency, band, channel)) {
-        //        _current_band = band;
-        //        _current_channel = channel;
-        //    } else {
-        //        _current_frequency = calced_freq;
-        //    }
-        //} else {
+        if (_current_frequency > 0) {
+            VideoBand band;
+            uint8_t channel;
+            if (get_band_and_channel(_current_frequency, band, channel)) {
+                //_current_band = band;
+               // _current_channel = channel;
+           
+                _current_frequency = calced_freq;
+            }
+        } else {
             _current_frequency = calced_freq;
-        //}
+        }
     }
 
     if (!_options.configured()) {
@@ -498,7 +610,7 @@ bool AP_VideoTX::set_defaults()
         if (_frequency_mhz > 0) {
             update_configured_channel_and_band();
         } else {
-           update_configured_frequency();
+            update_configured_frequency();
         }
     }
 

@@ -67,9 +67,7 @@ public:
         BAND_O,
         BAND_X,
         BAND_1G3_A,
-        BAND_1G3_B,
-        BAND_3G3_A,
-        BAND_3G3_B,       
+        BAND_1G3_B,       
         MAX_BANDS
     };
 
@@ -169,7 +167,7 @@ public:
     void announce_vtx_settings() const;
     // force the current values to reflect the configured values
     void set_power_is_current();
-    void set_freq_is_current();
+    void set_freq_is_current(int8_t position);
     void set_options_are_current() {  _current_options = _options; }
 
     void set_configuration_finished(bool configuration_finished) { _configuration_finished = configuration_finished; }
@@ -195,11 +193,22 @@ private:
     // frequency band
     AP_Int8 _band;
     AP_Int8 _band1;
+    AP_Int8 _band2;
+    AP_Int8 _band3;
+    AP_Int8 _band4;
+    AP_Int8 _band5;
+    AP_Int8 _band6;
     uint16_t _current_band;
 
     // frequency channel
     AP_Int8 _channel;
     AP_Int8 _channel1;
+    AP_Int8 _channel2;
+    AP_Int8 _channel3;
+    AP_Int8 _channel4;
+    AP_Int8 _channel5;
+    AP_Int8 _channel6;
+
     uint8_t _current_channel;
 
     // vtx options
