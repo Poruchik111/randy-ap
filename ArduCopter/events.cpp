@@ -473,8 +473,10 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             set_mode_land_with_pause(reason); //go up to rtl alt
             break;
         case FailsafeAction::RTL:
+    // no Radio Failsafe action if we are in Land mode
+            if (flightmode->mode_number() != Mode::Number::LAND){
             set_mode(Mode::Number::RTL, ModeReason::RADIO_FAILSAFE); //compass rtl if no gps
-
+            }
             break;
         case FailsafeAction::SMARTRTL:
             set_mode_SmartRTL_or_RTL(reason);
