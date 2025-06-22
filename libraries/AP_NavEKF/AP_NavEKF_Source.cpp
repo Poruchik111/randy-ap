@@ -135,7 +135,7 @@ const AP_Param::GroupInfo AP_NavEKF_Source::var_info[] = {
     // @Param: _OPTIONS
     // @DisplayName: EKF Source Options
     // @Description: EKF Source Options
-    // @Bitmask: 0:FuseAllVelocities
+    // @Bitmask: 0:FuseAllVelocities, 1:AlignExtNavPosWhenUsingOptFlow
     // @User: Advanced
     AP_GROUPINFO("_OPTIONS", 16, AP_NavEKF_Source, _options, (int16_t)SourceOptions::FUSE_ALL_VELOCITIES),
 
@@ -148,11 +148,11 @@ AP_NavEKF_Source::AP_NavEKF_Source()
 }
 
 // set position, velocity and yaw sources to either 0=primary, 1=secondary, 2=tertiary
-void AP_NavEKF_Source::setPosVelYawSourceSet(uint8_t source_set_idx)
+void AP_NavEKF_Source::setPosVelYawSourceSet(AP_NavEKF_Source::SourceSetSelection source_set_idx)
 {
     // sanity check source idx
-    if (source_set_idx < AP_NAKEKF_SOURCE_SET_MAX) {
-        active_source_set = source_set_idx;
+    if ((uint8_t)source_set_idx < AP_NAKEKF_SOURCE_SET_MAX) {
+        active_source_set = (uint8_t)source_set_idx;
 #if HAL_LOGGING_ENABLED
         static const LogEvent evt[AP_NAKEKF_SOURCE_SET_MAX] {
             LogEvent::EK3_SOURCES_SET_TO_PRIMARY,
@@ -257,11 +257,12 @@ void AP_NavEKF_Source::align_inactive_sources()
         return;
     }
 
-    // consider aligning XY position:
+    // consider aligning ExtNav XY position:
     bool align_posxy = false;
     if ((getPosXYSource() == SourceXY::GPS) ||
-        (getPosXYSource() == SourceXY::BEACON)) {
-        // only align position if active source is GPS or Beacon
+        (getPosXYSource() == SourceXY::BEACON) ||
+        ((getVelXYSource() == SourceXY::OPTFLOW) && option_is_set(SourceOptions::ALIGN_EXTNAV_POS_WHEN_USING_OPTFLOW))) {
+        // align ExtNav position if active source is GPS, Beacon or (optionally) Optflow
         for (uint8_t i=0; i<AP_NAKEKF_SOURCE_SET_MAX; i++) {
             if (_source_set[i].posxy == SourceXY::EXTNAV) {
                 // ExtNav could potentially be used, so align it

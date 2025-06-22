@@ -185,6 +185,7 @@ public:
         k_param_fs_batt_voltage,          // unused - moved to AP_BattMonitor
         k_param_failsafe_pilot_input,
         k_param_failsafe_pilot_input_timeout,
+        k_param_failsafe_gcs_timeout,
 
 
         // Misc Sub settings
@@ -257,6 +258,7 @@ public:
     AP_Int8         failsafe_terrain;
     AP_Int8         failsafe_pilot_input;       // pilot input failsafe behavior
     AP_Float        failsafe_pilot_input_timeout;
+    AP_Float        failsafe_gcs_timeout;       // ground station failsafe timeout (seconds)
 
     AP_Int8         xtrack_angle_limit;
 
@@ -366,6 +368,9 @@ public:
     // control over servo output ranges
     SRV_Channels servo_channels;
 
+    AP_Float backup_origin_lat;
+    AP_Float backup_origin_lon;
+    AP_Float backup_origin_alt;
 };
 
 extern const AP_Param::Info        var_info[];

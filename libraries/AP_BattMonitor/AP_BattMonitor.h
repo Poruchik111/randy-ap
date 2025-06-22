@@ -70,6 +70,7 @@ class AP_BattMonitor
     friend class AP_BattMonitor_INA239;
     friend class AP_BattMonitor_LTC2946;
     friend class AP_BattMonitor_AD7091R5;
+    friend class AP_BattMonitor_INA3221;
 
     friend class AP_BattMonitor_Torqeedo;
     friend class AP_BattMonitor_FuelLevel_Analog;
@@ -116,6 +117,7 @@ public:
         EFI                            = 27,
         AD7091R5                       = 28,
         Scripting                      = 29,
+        INA3221                        = 30,
     };
 
     FUNCTOR_TYPEDEF(battery_failsafe_handler_fn_t, void, const char *, const int8_t);
@@ -261,6 +263,8 @@ public:
     // MPPT Control (Solar panels)
     void MPPT_set_powered_state_to_all(const bool power_on);
     void MPPT_set_powered_state(const uint8_t instance, const bool power_on);
+
+    bool option_is_set(uint8_t instance, AP_BattMonitor_Params::Options option) const;
 
     // cycle count
     bool get_cycle_count(uint8_t instance, uint16_t &cycles) const;

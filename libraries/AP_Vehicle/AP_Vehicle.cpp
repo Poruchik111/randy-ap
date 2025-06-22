@@ -3,6 +3,7 @@
 #if AP_VEHICLE_ENABLED
 
 #include "AP_Vehicle.h"
+#include <AP_InertialSensor/AP_InertialSensor_rate_config.h>
 
 #include <AP_BLHeli/AP_BLHeli.h>
 #include <AP_Common/AP_FWVersion.h>
@@ -223,6 +224,7 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
       are too deep in the parameter tree
      */
 
+#if AP_NETWORKING_REGISTER_PORT_ENABLED
 #if AP_NETWORKING_NUM_PORTS > 0
     // @Group: NET_P1_
     // @Path: ../AP_Networking/AP_Networking_port.cpp
@@ -246,6 +248,7 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     // @Path: ../AP_Networking/AP_Networking_port.cpp
     AP_SUBGROUPINFO(networking.ports[3], "NET_P4_", 25, AP_Vehicle, AP_Networking::Port),
 #endif
+#endif  // AP_NETWORKING_REGISTER_PORT_ENABLED
 #endif // AP_NETWORKING_ENABLED
 
 #if AP_FILTER_ENABLED
@@ -436,7 +439,7 @@ void AP_Vehicle::setup()
 
 
 #if AP_SRV_CHANNELS_ENABLED
-    SRV_Channels::init();
+    AP::srv().init();
 #endif
 
     // gyro FFT needs to be initialized really late
@@ -530,6 +533,10 @@ void AP_Vehicle::setup()
         GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%s Failed to Initialize", AP_DDS_Client::msg_prefix);
     }
 #endif
+
+#if AP_IBUS_TELEM_ENABLED
+    ibus_telem.init();
+#endif
 }
 
 void AP_Vehicle::loop()
@@ -615,7 +622,7 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_GyroFFT,   &vehicle.gyro_fft,       update,                  400, 50, 205),
     SCHED_TASK_CLASS(AP_GyroFFT,   &vehicle.gyro_fft,       update_parameters,         1, 50, 210),
 #endif
-#if AP_INERTIALSENSOR_HARMONICNOTCH_ENABLED
+#if AP_INERTIALSENSOR_HARMONICNOTCH_ENABLED && !AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED
     SCHED_TASK(update_dynamic_notch_at_specified_rate,      LOOP_RATE,                    200, 215),
 #endif
 #if AP_VIDEOTX_ENABLED
@@ -627,6 +634,9 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
     SCHED_TASK(send_watchdog_reset_statustext,         0.1,     20, 225),
 #if HAL_WITH_ESC_TELEM
     SCHED_TASK_CLASS(AP_ESC_Telem, &vehicle.esc_telem,      update,                  100,  50, 230),
+#endif
+#if AP_SERVO_TELEM_ENABLED
+    SCHED_TASK_CLASS(AP_Servo_Telem, &vehicle.servo_telem,  update,                   50,  50, 231),
 #endif
 #if HAL_GENERATOR_ENABLED
     SCHED_TASK_CLASS(AP_Generator, &vehicle.generator,      update,                   10,  50, 235),
@@ -772,21 +782,43 @@ bool AP_Vehicle::is_crashed() const
 // update the harmonic notch filter for throttle based notch
 void AP_Vehicle::update_throttle_notch(AP_InertialSensor::HarmonicNotch &notch)
 {
-#if APM_BUILD_TYPE(APM_BUILD_ArduPlane)||APM_BUILD_COPTER_OR_HELI||APM_BUILD_TYPE(APM_BUILD_Rover)
+#if APM_BUILD_TYPE(APM_BUILD_ArduPlane) || APM_BUILD_COPTER_OR_HELI || APM_BUILD_TYPE(APM_BUILD_Rover)
     const float ref_freq = notch.params.center_freq_hz();
     const float ref = notch.params.reference();
 
-#if APM_BUILD_TYPE(APM_BUILD_ArduPlane)||APM_BUILD_COPTER_OR_HELI
+#if APM_BUILD_TYPE(APM_BUILD_ArduPlane) || APM_BUILD_COPTER_OR_HELI
     const AP_Motors* motors = AP::motors();
-    const float motors_throttle = motors != nullptr ? MAX(0,motors->get_throttle_out()) : 0;
+    if (motors == nullptr) {
+         notch.update_freq_hz(0);
+         return;
+    }
+    const float motors_throttle = MAX(0,motors->get_throttle_out());
+    // set the harmonic notch filter frequency scaled on measured frequency
+    if (notch.params.hasOption(HarmonicNotchFilterParams::Options::DynamicHarmonic)) {
+        float notches[INS_MAX_NOTCHES];
+        uint8_t motor_num = 0;
+        for (uint8_t i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
+            float motor_throttle = 0;
+            if (motors->get_thrust(i, motor_throttle)) {
+                notches[motor_num] = ref_freq * sqrtf(MAX(0, motor_throttle) / ref);
+                motor_num++;
+            }
+            if (motor_num >= INS_MAX_NOTCHES) {
+                break;
+            }
+        }
+        notch.update_frequencies_hz(motor_num, notches);
+    } else
 #else  // APM_BUILD_Rover
     const AP_MotorsUGV *motors = AP::motors_ugv();
     const float motors_throttle = motors != nullptr ? abs(motors->get_throttle() / 100.0f) : 0;
 #endif
+    {
+        float throttle_freq = ref_freq * sqrtf(MAX(0,motors_throttle) / ref);
 
-    float throttle_freq = ref_freq * sqrtf(MAX(0,motors_throttle) / ref);
+        notch.update_freq_hz(throttle_freq);
+    }
 
-    notch.update_freq_hz(throttle_freq);
 #endif
 }
 
