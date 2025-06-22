@@ -749,9 +749,10 @@ void Copter::three_hz_loop()
     gripper_release2();
     gripper_center();
     autodrop();
-
+    
     // update assigned functions and enable auxiliary servos
-    SRV_Channels::enable_aux_servos();
+    AP::srv().enable_aux_servos();
+
 }
 
 // ap_value calculates a 32-bit bitmask representing various pieces of
@@ -792,18 +793,12 @@ void Copter::one_hz_loop()
 #endif
     }
 
-     // update assigned functions and enable auxiliary servos
-    AP::srv().enable_aux_servos();
-
     ignition_timer();
 
     // stop chupamotors in non-Sport modes
     if (!(flightmode->mode_number() == Mode::Number::SPORT)) {
     SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
     }
-    
-    // update assigned functions and enable auxiliary servos
-    AP::srv().enable_aux_servos();
 
 #if HAL_LOGGING_ENABLED
     // log terrain data
