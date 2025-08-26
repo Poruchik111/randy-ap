@@ -747,14 +747,14 @@ void Copter::compass_rtl()
     }
         //compass rtl when radio ok
     if (!failsafe.radio) {
-        set_target_angle_and_climb(0,-30,compass_rtl_course,0,true,35);
+        set_target_angle_and_climb(0,-26,compass_rtl_course,0,true,35);
     }
         // Compass RTL when Radiofailsafe   
     if (failsafe.radio && !flte) {
     if (baro_alt <= g.rtl_altitude){
         set_target_angle_and_climb(0, 0,ahrs.get_yaw(),6,true,35);
     }else{
-        set_target_angle_and_climb(0,-30,compass_rtl_course,0,true,35);         
+        set_target_angle_and_climb(0,-26,compass_rtl_course,0,true,35);         
     }
     }
 

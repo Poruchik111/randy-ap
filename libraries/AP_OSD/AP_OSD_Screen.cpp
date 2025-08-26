@@ -2462,7 +2462,7 @@ void AP_OSD_Screen::draw_pluscode(uint8_t x, uint8_t y)
  */
 void AP_OSD_Screen::draw_callsign(uint8_t x, uint8_t y)
 {
-    backend->write(x, y, false, "CANNIBAL");
+    backend->write(x, y, false, "CHUPAKABRA");
 }
 
 void AP_OSD_Screen::draw_current2(uint8_t x, uint8_t y)
