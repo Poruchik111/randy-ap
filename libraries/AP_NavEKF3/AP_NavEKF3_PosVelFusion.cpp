@@ -930,7 +930,7 @@ void NavEKF3_core::FuseVelPosNED()
             varInnovVelPos[5] = P[9][9] + R_OBS_DATA_CHECKS[5];
 
             // Calculate the innovation consistency test ratio
-            hgtTestRatio = sq(innovVelPos[5]) / (sq(MAX(0.01 * (ftype)frontend->_hgtInnovGate, 1.0)) * varInnovVelPos[5]);
+            hgtTestRatio = sq(innovVelPos[5]) / (sq(MAX(0.01 * (ftype)frontend->_hgtInnovGate_corr, 1.0)) * varInnovVelPos[5]);
 
             // When on ground we accept a larger test ratio to allow the filter to handle large switch on IMU
             // bias errors without rejecting the height sensor.
@@ -1361,7 +1361,7 @@ void NavEKF3_core::selectHeightForFusion()
         // enable fusion
         fuseHgtData = true;
         // set the observation noise
-        posDownObsNoise = sq(constrain_ftype(frontend->_baroAltNoise, 0.1f, 100.0f));
+        posDownObsNoise = sq(constrain_ftype(frontend->_baroAltNoise_corr, 0.1f, 100.0f));
         // reduce weighting (increase observation noise) on baro if we are likely to be experiencing rotor wash ground interaction
         if (dal.get_takeoff_expected() || dal.get_touchdown_expected()) {
             posDownObsNoise *= frontend->gndEffectBaroScaler;
@@ -1377,7 +1377,7 @@ void NavEKF3_core::selectHeightForFusion()
             posDownObsNoise = sq(2.0f);
         } else {
             // alow a larger value when flying to accomodate vertical maneouvres
-            posDownObsNoise = sq(constrain_ftype(frontend->_baroAltNoise, 2.0f, 100.0f));
+            posDownObsNoise = sq(constrain_ftype(frontend->_baroAltNoise_corr, 2.0f, 100.0f));
         }
     } else {
         fuseHgtData = false;

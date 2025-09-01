@@ -451,6 +451,10 @@ private:
     AP_Enum<LogLevel> _log_level;   // log verbosity level
     AP_Float _gpsVAccThreshold;     // vertical accuracy threshold to use GPS as an altitude source
     AP_Int32 _options;              // bit mask of processing options
+    
+    // added for vibe correction 
+    ftype _baroAltNoise_corr;  // corrected by Vibe level
+    ftype _hgtInnovGate_corr; // corrected by Vibe level
 
     // enum for processing options
     enum class Option {
