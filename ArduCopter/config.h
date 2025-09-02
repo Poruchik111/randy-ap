@@ -353,7 +353,7 @@
 # define LAND_DETECTOR_ACCEL_MAX            1.0f    // vehicle acceleration must be under 1m/s/s
 #endif
 #ifndef LAND_DETECTOR_VEL_Z_MAX
-# define LAND_DETECTOR_VEL_Z_MAX              1.0f    // vehicle vertical velocity must be under 1m/s
+# define LAND_DETECTOR_VEL_Z_MAX            2.0f    // vehicle vertical velocity must be under 1m/s
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
