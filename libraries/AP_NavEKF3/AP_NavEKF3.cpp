@@ -134,7 +134,7 @@
 
 // vibe level correction for baro Height control 
 #define ALT_VIBE_THR_DEFAULT    10.0f  // normal vibes for tight tuning
-#define ALT_VIBE_K_ALT_M_NSE    0.22f // increase coeff
+#define ALT_VIBE_K_ALT_M_NSE    0.2f // increase coeff
 #define ALT_VIBE_K_HGT_I_GATE   0.02f // increase coeff
 #define ALT_VIBE_K_MAX          10.0f  // max correction coeff- from 0.5 @ vibe 10, to 3.0 @ vibes 60
 
@@ -933,15 +933,18 @@ void NavEKF3::UpdateFilter(void)
     factor = constrain_ftype(factor, ftype(1), ftype(ALT_VIBE_K_MAX));
     factor1 = constrain_ftype(factor, ftype(1), ftype(ALT_VIBE_K_MAX));
     // 
-    _baroAltNoise_corr = constrain_ftype(_baroAltNoise * factor, ftype(0.05f), ftype(10.0f));
+    _baroAltNoise_corr = constrain_ftype(_baroAltNoise * factor, ftype(0.1f), ftype(4.0f));
     _hgtInnovGate_corr = constrain_ftype(_hgtInnovGate * factor1, ftype(100.0f), ftype(1000.0f));
 
     static uint32_t _banomsg_last_ms = 0;
     const uint32_t now = AP_HAL::millis();
-    if (now - _banomsg_last_ms >= 200) { // ~5 Гц, чтобы не засорять лог
+    if (now - _banomsg_last_ms >= 500) { //  Гц, чтобы не засорять лог
     _banomsg_last_ms = now;
-    AP::logger().Write_MessageF("BANO Noise corr =%.2f", (double)_baroAltNoise_corr);
-    AP::logger().Write_MessageF("BANO I gate corr =%.2f", (double)_hgtInnovGate_corr);
+    AP::logger().Write_MessageF("BANO Noise_corr=%.2f", (double)_baroAltNoise_corr);
+    AP::logger().Write_MessageF("BANO I_gate_corr=%.2f", (double)_hgtInnovGate_corr);
+    if (now - _banomsg_last_ms >= 250) {
+    AP::logger().Write_MessageF("BANO Vibe_avr=%.2f", (double)vibe_avg);
+    }
     }
     //
     
