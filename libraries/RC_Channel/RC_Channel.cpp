@@ -18,7 +18,6 @@
  */
 
 #include "RC_Channel_config.h"
-#include "AP_Relay/AP_Relay.h"
 
 #if AP_RC_CHANNEL_ENABLED
 
