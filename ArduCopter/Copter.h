@@ -176,6 +176,10 @@
 
 class Copter : public AP_Vehicle {
 public:
+    //static Copter *copter;
+    uint8_t pos_state;
+    uint8_t swpos;
+
     friend class GCS_MAVLINK_Copter;
     friend class GCS_Copter;
     friend class AP_Rally_Copter;
@@ -731,6 +735,7 @@ private:
     bool get_wp_bearing_deg(float &bearing) const override;
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
+    void vrx_changed();
 
     // Attitude.cpp
     void update_throttle_hover();
@@ -1122,7 +1127,7 @@ private:
     bool using_rate_thread;
 
 public:
-    void failsafe_check();      // failsafe.cpp
+    void failsafe_check();      // failsafe.cpp  
 };
 
 extern Copter copter;

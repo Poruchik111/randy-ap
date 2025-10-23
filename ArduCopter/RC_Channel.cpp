@@ -35,6 +35,7 @@ void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
             copter.set_simple_mode(BIT_IS_SET(copter.g.simple_modes, new_pos) ? Copter::SimpleMode::SIMPLE : Copter::SimpleMode::NONE);
         }
     }
+    copter.pos_state = new_pos;
 }
 
 bool RC_Channels_Copter::in_rc_failsafe() const

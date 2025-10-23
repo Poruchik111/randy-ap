@@ -76,6 +76,7 @@
 
 #include "Copter.h"
 #include <AP_InertialSensor/AP_InertialSensor_rate_config.h>
+#include <RC_Channel/RC_Channel.h>
 
 #define FORCE_VERSION_H_INCLUDE
 #include "version.h"
@@ -747,6 +748,8 @@ void Copter::three_hz_loop()
 
     // check if avoidance should be enabled based on alt
     low_alt_avoidance();
+
+    vrx_changed();
 }
 
 // ap_value calculates a 32-bit bitmask representing various pieces of
@@ -958,6 +961,58 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
         rate_ef_targets = attitude_control->get_rate_ef_targets();
     }
     return true;
+}
+
+ void Copter::vrx_changed()
+{
+
+    if (swpos == pos_state) {
+        return;
+    }
+
+    if (pos_state < 1) {
+        relay.off(0);
+        relay.off(1);
+        relay.off(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 1");
+
+    }else if (pos_state < 2) {
+        relay.on(0);
+        relay.off(1);
+        relay.off(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 2");
+
+    }else if (pos_state < 3) {
+        relay.on(0);
+        relay.on(1);
+        relay.off(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 3");
+
+    }else if (pos_state < 4) {
+        relay.on(0);
+        relay.off(1);
+        relay.on(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 4");
+
+    }else if (pos_state < 5) {
+        relay.off(0);
+        relay.on(1);
+        relay.on(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 5");
+
+    }else{
+        relay.on(0);
+        relay.on(1);
+        relay.on(2);
+        swpos = pos_state;
+        gcs().send_text(MAV_SEVERITY_WARNING, "VRX 6");
+    }
+
 }
 
 /*

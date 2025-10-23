@@ -567,35 +567,16 @@ bool RC_Channel::read_6pos_switch(int8_t& position)
 
     if (pulsewidth < 1231) {
         position = 0;
-        hal.gpio->write(54, 0);
-        hal.gpio->write(55, 0);
-        hal.gpio->write(56, 0);
-
     } else if (pulsewidth < 1361) {
         position = 1;
-        hal.gpio->write(54, 1);
-        hal.gpio->write(55, 0);
-        hal.gpio->write(56, 0);
     } else if (pulsewidth < 1491) {
         position = 2;
-        hal.gpio->write(54, 0);
-        hal.gpio->write(55, 1);
-        hal.gpio->write(56, 0);
     } else if (pulsewidth < 1621) {
         position = 3;
-        hal.gpio->write(54, 1);
-        hal.gpio->write(55, 1);
-        hal.gpio->write(56, 0);
     } else if (pulsewidth < 1750) {
         position = 4;
-        hal.gpio->write(54, 1);
-        hal.gpio->write(55, 0);
-        hal.gpio->write(56, 1);
     } else {
         position = 5;
-        hal.gpio->write(54, 1);
-        hal.gpio->write(55, 1);
-        hal.gpio->write(56, 1);
     }
 
     if (!debounce_completed(position)) {
@@ -611,6 +592,7 @@ void RC_Channel::read_mode_switch()
     if (read_6pos_switch(position)) {
         // set flight mode and simple mode setting
         mode_switch_changed(modeswitch_pos_t(position));
+       
     }
 }
 
