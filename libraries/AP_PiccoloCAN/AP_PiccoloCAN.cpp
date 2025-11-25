@@ -34,6 +34,7 @@
 #include <AP_CANManager/AP_CANManager.h>
 
 #include <AP_EFI/AP_EFI_Currawong_ECU.h>
+#include <AP_Generator/AP_Generator_Cortex.h>
 #include <AP_Servo_Telem/AP_Servo_Telem.h>
 
 #include <stdio.h>
@@ -148,7 +149,7 @@ bool AP_PiccoloCAN::add_interface(AP_HAL::CANIface* can_iface) {
 }
 
 // initialize PiccoloCAN bus
-void AP_PiccoloCAN::init(uint8_t driver_index, bool enable_filters)
+void AP_PiccoloCAN::init(uint8_t driver_index)
 {
     _driver_index = driver_index;
 
@@ -249,11 +250,11 @@ void AP_PiccoloCAN::loop()
             // ESC messages exist in the ACTUATOR group
             case PiccoloCAN_MessageGroup::ACTUATOR:
 
-                switch (PiccoloCAN_ActuatorType(frame_id_device)) {
-                case PiccoloCAN_ActuatorType::SERVO:
+                switch (PiccoloCAN_DeviceType(frame_id_device)) {
+                case PiccoloCAN_DeviceType::SERVO:
                     handle_servo_message(rxFrame);
                     break;
-                case PiccoloCAN_ActuatorType::ESC:
+                case PiccoloCAN_DeviceType::ESC:
                     handle_esc_message(rxFrame);
                     break;
                 default:
@@ -266,6 +267,9 @@ void AP_PiccoloCAN::loop()
             #if AP_EFI_CURRAWONG_ECU_ENABLED
                 handle_ecu_message(rxFrame);
             #endif
+                break;
+            case PiccoloCAN_MessageGroup::BATTERY:
+                handle_cortex_message(rxFrame);
                 break;
             default:
                 break;
@@ -327,7 +331,7 @@ void AP_PiccoloCAN::update()
 
             uint16_t output = 0;
 
-            SRV_Channel::Aux_servo_function_t function = SRV_Channels::channel_function(ii);
+            SRV_Channel::Function function = SRV_Channels::channel_function(ii);
 
             if (SRV_Channels::get_output_pwm(function, output)) {
                 _servos[ii].command = output;
@@ -343,7 +347,7 @@ void AP_PiccoloCAN::update()
 
             uint16_t output = 0;
             
-            SRV_Channel::Aux_servo_function_t motor_function = SRV_Channels::get_motor_function(ii);
+            SRV_Channel::Function motor_function = SRV_Channels::get_motor_function(ii);
 
             if (SRV_Channels::get_output_pwm(motor_function, output)) {
                 _escs[ii].command = output;
@@ -380,14 +384,14 @@ void AP_PiccoloCAN::update()
                     .duty_cycle = servo.dutyCycle(),
                     .motor_temperature_cdeg = int16_t(servo.temperature() * 100),
                     .status_flags = err.errors,
-                    .valid_types = AP_Servo_Telem::TelemetryData::Types::COMMANDED_POSITION |
-                                   AP_Servo_Telem::TelemetryData::Types::MEASURED_POSITION |
-                                   AP_Servo_Telem::TelemetryData::Types::SPEED |
-                                   AP_Servo_Telem::TelemetryData::Types::VOLTAGE |
-                                   AP_Servo_Telem::TelemetryData::Types::CURRENT |
-                                   AP_Servo_Telem::TelemetryData::Types::DUTY_CYCLE |
-                                   AP_Servo_Telem::TelemetryData::Types::MOTOR_TEMP |
-                                   AP_Servo_Telem::TelemetryData::Types::STATUS
+                    .present_types = AP_Servo_Telem::TelemetryData::Types::COMMANDED_POSITION |
+                                     AP_Servo_Telem::TelemetryData::Types::MEASURED_POSITION |
+                                     AP_Servo_Telem::TelemetryData::Types::SPEED |
+                                     AP_Servo_Telem::TelemetryData::Types::VOLTAGE |
+                                     AP_Servo_Telem::TelemetryData::Types::CURRENT |
+                                     AP_Servo_Telem::TelemetryData::Types::DUTY_CYCLE |
+                                     AP_Servo_Telem::TelemetryData::Types::MOTOR_TEMP |
+                                     AP_Servo_Telem::TelemetryData::Types::STATUS
                 };
 
                 servo_telem->update_telem_data(ii, telem_data);
@@ -627,6 +631,22 @@ bool AP_PiccoloCAN::handle_ecu_message(AP_HAL::CANFrame &frame)
 }
 #endif // AP_EFI_CURRAWONG_ECU_ENABLED
 
+
+bool AP_PiccoloCAN::handle_cortex_message(AP_HAL::CANFrame &frame)
+{
+#if AP_GENERATOR_CORTEX_ENABLED
+    // Get the generator instance
+    AP_Generator_Cortex* gen = AP_Generator_Cortex::get_instance();
+
+    if (gen != nullptr) {
+        return gen->handle_message(frame, *this);
+    }
+#endif // AP_GENERATOR_CORTEX_ENABLED
+
+    return false;
+}
+
+
 /**
  * Check if a given servo channel is "active" (has been configured for Piccolo control output)
  */
@@ -637,7 +657,7 @@ bool AP_PiccoloCAN::is_servo_channel_active(uint8_t chan)
         return false;
     }
 
-    SRV_Channel::Aux_servo_function_t function = SRV_Channels::channel_function(chan);
+    SRV_Channel::Function function = SRV_Channels::channel_function(chan);
 
     // Ignore if the servo channel does not have a function assigned
     if (function <= SRV_Channel::k_none) {
@@ -664,7 +684,7 @@ bool AP_PiccoloCAN::is_esc_channel_active(uint8_t chan)
     }
 
     // Check if a motor function is assigned for this motor channel
-    SRV_Channel::Aux_servo_function_t motor_function = SRV_Channels::get_motor_function(chan);
+    SRV_Channel::Function motor_function = SRV_Channels::get_motor_function(chan);
 
     if (SRV_Channels::function_assigned(motor_function)) {
         return true;

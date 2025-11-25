@@ -135,6 +135,7 @@ const struct MultiplierStructure log_Multipliers[] = {
 #include <AP_Camera/LogStructure.h>
 #include <AP_Mount/LogStructure.h>
 #include <AP_Baro/LogStructure.h>
+#include <AP_CANManager/LogStructure.h>
 #include <AP_VisualOdom/LogStructure.h>
 #include <AC_PrecLand/LogStructure.h>
 #include <AP_Proximity/LogStructure.h>
@@ -315,6 +316,7 @@ struct PACKED log_MAV {
     uint8_t flags;
     uint16_t stream_slowdown_ms;
     uint16_t times_full;
+    uint32_t GCS_SYSID_last_seen_ms;
 };
 
 struct PACKED log_RSSI {
@@ -455,7 +457,7 @@ struct PACKED log_RFND {
     LOG_PACKET_HEADER;
     uint64_t time_us;
     uint8_t instance;
-    uint16_t dist;
+    float dist;
     uint8_t status;
     uint8_t orient;
     int8_t quality;
@@ -494,7 +496,7 @@ struct PACKED log_ARSP {
     uint8_t primary;
 };
 
-struct PACKED log_MAV_Stats {
+struct PACKED log_DMS {
     LOG_PACKET_HEADER;
     uint64_t timestamp;
     uint32_t seqno;
@@ -635,6 +637,8 @@ struct PACKED log_VER {
     uint16_t _APJ_BOARD_ID;
     uint8_t build_type;
     uint8_t filter_version;
+    uint32_t iomcu_mcu_id;
+    uint32_t iomcu_cpu_id;
 };
 
 
@@ -664,7 +668,7 @@ struct PACKED log_VER {
 // @Field: TimeUS: Time since system startup
 // @Field: ArmState: true if vehicle is now armed
 // @Field: ArmChecks: arming bitmask at time of arming
-// @FieldBitmaskEnum: ArmChecks: AP_Arming::ArmingChecks
+// @FieldBitmaskEnum: ArmChecks: AP_Arming::Check
 // @Field: Forced: true if arm/disarm was forced
 // @Field: Method: method used for arming
 // @FieldValueEnum: Method: AP_Arming::Method
@@ -775,6 +779,7 @@ struct PACKED log_VER {
 // @FieldBitmaskEnum: flags: GCS_MAVLINK::Flags
 // @Field: ss: stream slowdown is the number of ms being added to each message to fit within bandwidth
 // @Field: tf: times buffer was full when a message was going to be sent
+// @Field: mgs: time MAV_GCS_SYSID heartbeat (or manual control) last seen
 
 // @LoggerMessage: MAVC
 // @Description: MAVLink command we have just executed
@@ -867,9 +872,9 @@ struct PACKED log_VER {
 // @Field: MaxT: Maximum loop time
 // @Field: Mem: Free memory available
 // @Field: Load: System processor load
+// @Field: ErrL: Internal error line number; last line number on which a internal error was detected
 // @Field: InE: Internal error mask; which internal errors have been detected
 // @FieldBitmaskEnum: InE: AP_InternalError::error_t
-// @Field: ErrL: Internal error line number; last line number on which a internal error was detected
 // @Field: ErC: Internal error count; how many internal errors have been detected
 // @Field: SPIC: Number of SPI transactions processed
 // @Field: I2CC: Number of i2c transactions processed
@@ -996,6 +1001,7 @@ struct PACKED log_VER {
 // @Field: Stat: Sensor state
 // @FieldValueEnum: Stat: RangeFinder::Status
 // @Field: Orient: Sensor orientation
+// @FieldValueEnum: Orient: Rotation
 // @Field: Quality: Signal quality. -1 means invalid, 0 is no signal, 100 is perfect signal
 
 // @LoggerMessage: RSSI
@@ -1120,6 +1126,8 @@ struct PACKED log_VER {
 // @Field: BU: Build vehicle type
 // @FieldValueEnum: BU: APM_BUILD
 // @Field: FV: Filter version
+// @Field: IMI: IOMCU MCU ID
+// @Field: ICI: IOMCU CPU ID
 
 // @LoggerMessage: MOTB
 // @Description: Motor mixer information
@@ -1159,6 +1167,7 @@ LOG_STRUCTURE_FROM_GPS \
     { LOG_RSSI_MSG, sizeof(log_RSSI), \
       "RSSI",  "Qff",     "TimeUS,RXRSSI,RXLQ", "s-%", "F--", true  }, \
 LOG_STRUCTURE_FROM_BARO \
+LOG_STRUCTURE_FROM_CANMANAGER \
 LOG_STRUCTURE_FROM_PRECLAND \
     { LOG_POWR_MSG, sizeof(log_POWR), \
       "POWR","QffHHB","TimeUS,Vcc,VServo,Flags,AccFlags,Safety", "svv---", "F00---", true }, \
@@ -1178,8 +1187,8 @@ LOG_STRUCTURE_FROM_MOUNT \
     { LOG_MODE_MSG, sizeof(log_Mode), \
       "MODE", "QMBB",         "TimeUS,Mode,ModeNum,Rsn", "s---", "F---" }, \
     { LOG_RFND_MSG, sizeof(log_RFND), \
-      "RFND", "QBCBBb", "TimeUS,Instance,Dist,Stat,Orient,Quality", "s#m--%", "F-B---", true }, \
-    { LOG_MAV_STATS, sizeof(log_MAV_Stats), \
+      "RFND", "QBfBBb", "TimeUS,Instance,Dist,Stat,Orient,Quality", "s#m--%", "F-0---", true }, \
+    { LOG_DMS_MSG, sizeof(log_DMS), \
       "DMS", "QIIIIBBBBBBBBB",         "TimeUS,N,Dp,RT,RS,Fa,Fmn,Fmx,Pa,Pmn,Pmx,Sa,Smn,Smx", "s-------------", "F-------------" }, \
     LOG_STRUCTURE_FROM_BEACON                                       \
     LOG_STRUCTURE_FROM_PROXIMITY                                    \
@@ -1224,7 +1233,7 @@ LOG_STRUCTURE_FROM_FENCE \
     { LOG_RALLY_MSG, sizeof(log_Rally), \
       "RALY", "QBBLLhB", "TimeUS,Tot,Seq,Lat,Lng,Alt,Flags", "s--DUm-", "F--GGB-" },  \
     { LOG_MAV_MSG, sizeof(log_MAV),   \
-      "MAV", "QBHHHBHH",   "TimeUS,chan,txp,rxp,rxdp,flags,ss,tf", "s#----s-", "F-000-C-" },   \
+      "MAV", "QBHHHBHHI",   "TimeUS,chan,txp,rxp,rxdp,flags,ss,tf,mgs", "s#----s-s", "F-000-C-C" },   \
 LOG_STRUCTURE_FROM_VISUALODOM \
     { LOG_OPTFLOW_MSG, sizeof(log_Optflow), \
       "OF",   "QBffff",   "TimeUS,Qual,flowX,flowY,bodyX,bodyY", "s-EEEE", "F-0000" , true }, \
@@ -1249,7 +1258,7 @@ LOG_STRUCTURE_FROM_AIS \
     { LOG_SCRIPTING_MSG, sizeof(log_Scripting), \
       "SCR",   "QNIii", "TimeUS,Name,Runtime,Total_mem,Run_mem", "s#sbb", "F-F--", true }, \
     { LOG_VER_MSG, sizeof(log_VER), \
-      "VER",   "QBHBBBBIZHBB", "TimeUS,BT,BST,Maj,Min,Pat,FWT,GH,FWS,APJ,BU,FV", "s-----------", "F-----------", false }, \
+      "VER",   "QBHBBBBIZHBBII", "TimeUS,BT,BST,Maj,Min,Pat,FWT,GH,FWS,APJ,BU,FV,IMI,ICI", "s-------------", "F-------------", false }, \
     { LOG_MOTBATT_MSG, sizeof(log_MotBatt), \
       "MOTB", "QfffffB",  "TimeUS,LiftMax,BatVolt,ThLimit,ThrAvMx,ThrOut,FailFlags", "s------", "F------" , true }
 
@@ -1266,6 +1275,7 @@ enum LogMessages : uint8_t {
     LOG_RCOUT_MSG,
     LOG_RSSI_MSG,
     LOG_IDS_FROM_BARO,
+    LOG_IDS_FROM_CANMANAGER,
     LOG_POWR_MSG,
     LOG_MCU_MSG,
     LOG_IDS_FROM_AHRS,
@@ -1296,7 +1306,7 @@ enum LogMessages : uint8_t {
     LOG_ARSP_MSG,
     LOG_IDS_FROM_RPM,
     LOG_RFND_MSG,
-    LOG_MAV_STATS,
+    LOG_DMS_MSG,
     LOG_FORMAT_UNITS_MSG,
     LOG_UNIT_MSG,
     LOG_MULT_MSG,
