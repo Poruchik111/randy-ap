@@ -797,7 +797,7 @@ void Copter::one_hz_loop()
 
     // stop chupamotors in non-Sport modes
     if (!(flightmode->mode_number() == Mode::Number::SPORT)) {
-    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
+    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1500);
     }
 
 #if HAL_LOGGING_ENABLED

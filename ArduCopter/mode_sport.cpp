@@ -102,11 +102,11 @@ void ModeSport::run()
         // control Motors 5,6 over pitch stick and Throttle
         //uint16_t kthrtl = constrain_uint16((motors->get_throttle_out() - 0.2) *10, 0.01, 1.0);
 
-        uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 + 1000;
+        uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 + 1050;
         target_pitch *= 0.33;
         SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
     }else{
-        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1000);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1050);
     }   
 
     // call attitude controller
