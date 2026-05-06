@@ -598,6 +598,16 @@ void Copter::throttle_loop()
     // compensate for ground effect (if enabled)
     update_ground_effect_detector();
     update_ekf_terrain_height_stable();
+
+   // Update chupamotor target pitch
+   if (copter.flightmode->mode_number() == Mode::Number::SPORT) {
+       int16_t pitch_in = -channel_pitch->get_control_in();
+        pitch_in = MAX(pitch_in, 0);
+
+        int16_t target_pwm = 1000 + (pitch_in * 1000) / 4500;
+
+        update_pwm5(target_pwm);
+   }
 }
 
 // update_batt_compass - read battery and compass
@@ -797,7 +807,7 @@ void Copter::one_hz_loop()
 
     // stop chupamotors in non-Sport modes
     if (!(flightmode->mode_number() == Mode::Number::SPORT)) {
-    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1500);
+    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1050);
     }
 
 #if HAL_LOGGING_ENABLED
@@ -991,6 +1001,30 @@ void Copter::calc_mean_heading() {
         compass_rtl_course -= 360;
     }
     gcs().send_text(MAV_SEVERITY_CRITICAL, "%i Deg RTL Course", compass_rtl_course);
+}
+
+void Copter::update_pwm5(int16_t target_pwm) {
+
+// 100 pwm/sec при 50 Hz = 2 pwm за один цикл
+const float PWM5_RATE = 100.0f;     // pwm per second
+const float DT = 0.02f;             // 50 Hz
+const int16_t PWM5_STEP = PWM5_RATE * DT; // = 2
+
+static int16_t pwm5_out = 1050;
+
+    if (pwm5_out < target_pwm) {
+        pwm5_out += PWM5_STEP;
+        if (pwm5_out > target_pwm) {
+            pwm5_out = target_pwm;
+        }
+    } else if (pwm5_out > target_pwm) {
+        pwm5_out -= PWM5_STEP;
+        if (pwm5_out < target_pwm) {
+            pwm5_out = target_pwm;
+        }
+    }
+
+    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, pwm5_out);
 }
 
 /*

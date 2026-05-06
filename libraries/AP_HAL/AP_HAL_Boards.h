@@ -194,7 +194,7 @@
 #endif
 
 #ifndef BOARD_FLASH_SIZE
-#define BOARD_FLASH_SIZE 2048
+#define BOARD_FLASH_SIZE 1024
 #endif
 
 #ifndef HAL_GYROFFT_ENABLED

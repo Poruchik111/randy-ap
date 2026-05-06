@@ -98,16 +98,21 @@ void ModeSport::run()
     }
 
     // limit front Pitch to -10 deg if max Pitch 30 deg and throttle high
-    if (target_pitch < -100){
-        // control Motors 5,6 over pitch stick and Throttle
-        //uint16_t kthrtl = constrain_uint16((motors->get_throttle_out() - 0.2) *10, 0.01, 1.0);
+    static bool pitch_scaled = false;
 
-        uint16_t chupamotors = -target_pitch / copter.aparm.angle_max * 800 + 1050;
-        target_pitch *= 0.33;
-        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, chupamotors);
-    }else{
-        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1050);
-    }   
+    if (!pitch_scaled) {
+        if (target_pitch < -100) {
+            pitch_scaled = true;
+        }
+    } else {
+        if (target_pitch >= 0) {
+            pitch_scaled = false;
+        }
+    }
+
+    if (pitch_scaled) {
+        target_pitch = target_pitch * 0.3f;
+    }  
 
     // call attitude controller
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
