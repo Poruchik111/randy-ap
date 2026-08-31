@@ -149,7 +149,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
 
     SCHED_TASK(rc_loop,              250,    130,  3),
-    SCHED_TASK(throttle_loop,         50,     75,  6),
+    SCHED_TASK(throttle_loop,         50,     100,  6),
 #if AP_FENCE_ENABLED
     SCHED_TASK(fence_check,           25,    100,  7),
 #endif
@@ -600,11 +600,14 @@ void Copter::throttle_loop()
     update_ekf_terrain_height_stable();
 
    // Update chupamotor target pitch
-   if (copter.flightmode->mode_number() == Mode::Number::SPORT) {
-       int16_t pitch_in = -channel_pitch->get_control_in();
+   if (copter.flightmode->mode_number() != Mode::Number::SPORT) {
+        pwm5_out = SRV_Channels::srv_channel(CH_5)->get_output_min();
+        SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, pwm5_out);       
+   }else{
+        int16_t pitch_in = -channel_pitch->get_control_in();
         pitch_in = MAX(pitch_in, 0);
 
-        int16_t target_pwm = 1000 + (pitch_in * 1000) / 4500;
+        int16_t target_pwm = SRV_Channels::srv_channel(CH_5)->get_output_min() + (pitch_in * (SRV_Channels::srv_channel(CH_5)->get_output_max()- SRV_Channels::srv_channel(CH_5)->get_output_min())) / 4500;
 
         update_pwm5(target_pwm);
    }
@@ -805,11 +808,6 @@ void Copter::one_hz_loop()
 
     ignition_timer();
 
-    // stop chupamotors in non-Sport modes
-    if (!(flightmode->mode_number() == Mode::Number::SPORT)) {
-    SRV_Channels::set_output_pwm(SRV_Channel::k_motor5, 1050);
-    }
-
 #if HAL_LOGGING_ENABLED
     // log terrain data
     terrain_logging();
@@ -1006,19 +1004,17 @@ void Copter::calc_mean_heading() {
 void Copter::update_pwm5(int16_t target_pwm) {
 
 // 100 pwm/sec при 50 Hz = 2 pwm за один цикл
-const float PWM5_RATE = 100.0f;     // pwm per second
-const float DT = 0.02f;             // 50 Hz
-const int16_t PWM5_STEP = PWM5_RATE * DT; // = 2
-
-static int16_t pwm5_out = 1050;
+const float pwm5_rate = 200.0f;     // pwm per second
+const float dt = 0.02f;             // 50 Hz
+const int16_t pwm5_step = pwm5_rate * dt; // = 2
 
     if (pwm5_out < target_pwm) {
-        pwm5_out += PWM5_STEP;
+        pwm5_out += pwm5_step;
         if (pwm5_out > target_pwm) {
             pwm5_out = target_pwm;
         }
     } else if (pwm5_out > target_pwm) {
-        pwm5_out -= PWM5_STEP;
+        pwm5_out -= pwm5_step;
         if (pwm5_out < target_pwm) {
             pwm5_out = target_pwm;
         }

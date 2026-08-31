@@ -767,6 +767,7 @@ private:
     bool set_target_angle_and_climb(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs);
     void calc_mean_heading();
     void update_pwm5(int16_t target_pwm);
+    int16_t pwm5_out = 1050;
     //uint32_t compass_total_count;
     //uint32_t compass_total_heading;
     //uint32_t compass_mean_heading;

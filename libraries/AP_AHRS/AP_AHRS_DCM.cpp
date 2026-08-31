@@ -668,8 +668,8 @@ bool AP_AHRS_DCM::should_correct_centrifugal() const
 // This drift correction implementation is based on a paper
 // by Bill Premerlani from here:
 //   http://gentlenav.googlecode.com/files/RollPitchDriftCompensation.pdf
-void
-AP_AHRS_DCM::drift_correction(float deltat)
+
+void AP_AHRS_DCM::drift_correction(float deltat)
 {
     Vector3f velocity;
     uint32_t last_correction_time;
@@ -815,6 +815,22 @@ AP_AHRS_DCM::drift_correction(float deltat)
         using_gps_corrections = true;
     }
 
+    // BF-like accel trust gate for DCM roll/pitch correction
+    const Vector3f accel_body = _ins.get_accel();
+    const float acc_g = accel_body.length() / GRAVITY_MSS;
+
+    // hysteresis-free first test version
+    const bool acc_good =
+        acc_g > 0.90f &&
+        acc_g < 1.10f;
+
+    // optional pusher-specific gate
+    const bool pusher_accel = fabsf(accel_body.x) > 2.0f;
+
+    // final trust flag
+    const bool trust_accel_rp = acc_good && !pusher_accel;
+//-----------------------------------------------------------------------//
+
     // calculate the error term in earth frame.
     // we do this for each available accelerometer then pick the
     // accelerometer that leads to the smallest error term. This takes
@@ -936,6 +952,11 @@ AP_AHRS_DCM::drift_correction(float deltat)
     // _omega_P value is what drags us quickly to the
     // accelerometer reading.
     _omega_P = error[besti] * _P_gain(spin_rate) * _kp;
+   
+    if (!trust_accel_rp) {  // decrease omega P if acc out of G range
+    _omega_P *= 0.05f;
+    }
+
     if (use_fast_gains()) {
         _omega_P *= 8;
     }
@@ -950,10 +971,15 @@ AP_AHRS_DCM::drift_correction(float deltat)
         _omega_P *= 0.5f;
     }
 
-    // accumulate some integrator error
-    if (spin_rate < ToRad(SPIN_RATE_LIMIT)) {
-        _omega_I_sum += error[besti] * _ki * _ra_deltat;
-        _omega_I_sum_time += _ra_deltat;
+    // accumulate some integrator error // changed to new logic
+    if (spin_rate < radians(SPIN_RATE_LIMIT)) {
+        if (trust_accel_rp) {
+            _omega_I_sum += error[besti] * _ki * _ra_deltat;
+            _omega_I_sum_time += _ra_deltat;
+        } else {
+            // Do not learn false gyro bias during acceleration
+            _omega_I_sum *= 0.99f;
+        }
     }
 
     if (_omega_I_sum_time >= 5) {
